@@ -35,7 +35,8 @@ It reads, from bytes or a reader you give it:
   rows and profiles, instances, gameplay records, model bounds). `track::Track` indexes a track's GeoChunk entries from
   its chunk maps, so a model number, a cell's reference or a template's model path resolves to the entry that holds it,
   and `Pgeo::instances_in` and `pvs::World::instances_in` give the placements in one x/z box. Every season's variant is
-  read; which one to draw is the caller's choice.
+  read; which one to draw is the caller's choice. `particles::Particles` reads the particle effects a track and its
+  routes place (`.particlebin`), and `gameobjs::GameObjs` the named places gameplay refers to (`GameObjs.xml`).
 
 More of the engine's formats (the contents of its models, materials and textures, and the rest of a track's placements)
 will follow. Used by [primase](https://github.com/Kalmarv/primase), a game-asset conversion library.
@@ -131,6 +132,10 @@ Your program reads the file and passes its text to `Keys::parse`; the crate itse
   block name is in no model template of the category's library (27 winter `GRASSTEMPLATE` names) and in 3,579 it is in
   two; they are counted, not refused. The placements in one box, read from the files whose header box may hold some,
   are those read from every file (Shibuya Scramble box: 297 files, 68,556 instances, 30 splines).
+  **Particle instances:** the 170 `.particlebin` files (the track's 3,959 instances, the home
+  space's none, and 168 route definitions with 508) read with every constant, link and string offset checked
+  (`tests/particles.rs`). **Game objects:** the track's 793, the open world's 59 and the home space's none read whole
+  (`tests/gameobjs.rs`).
 
 - **The Grub bundles** read on one install (Steam build 25588841): all 526,129 bundles of the Tokyo track's GeoChunks
   and the zips under `media` (196,620 models, 191,602 `.pb` and 126,527 `.swatchbin` textures, 9,707 materials, 987
@@ -143,8 +148,9 @@ Your program reads the file and passes its text to `Keys::parse`; the crate itse
 
 - It does not encrypt or re-encrypt, and it does not write any file or write into an archive.
 - It does not ship, find or derive keys.
-- It does not read the hand-placed `.pvsz` files, the track's cameras, `.hex` or `.deform_ban` files, `GameObjs.xml` or
-  `ParticleInstances.particlebin`. Where a placement file's field is not understood it keeps the raw value and says so.
+- It does not read the `.pvsz` visibility files, the track's cameras (`PreRaceCams.xml`, `TrackSegCams.xml`), `.hex` or
+  `.deform_ban` files, nor `Locators.xml`, `TriggerVolumes.xml` and `.cub`, which hold only an empty root element in the
+  install it was checked on. Where a placement file's field is not understood it keeps the raw value and says so.
 
 ## Running the tests
 
@@ -153,7 +159,8 @@ cargo test --workspace
 ```
 
 runs the tests that need no game file. The tests that read a real install (`tests/real_data.rs`, `tests/minizip.rs`,
-`tests/zip.rs`, `tests/settings.rs`, `tests/bundle.rs`, `tests/pgeo.rs`, `tests/plib.rs`, `tests/pvs.rs`) skip with a line
+`tests/zip.rs`, `tests/settings.rs`, `tests/bundle.rs`, `tests/pgeo.rs`, `tests/plib.rs`, `tests/pvs.rs`, `tests/particles.rs`,
+`tests/gameobjs.rs`) skip with a line
 naming what they need when `GAME_DATA` is not set. To run them, point the `GAME_DATA` environment variable at a TOML
 file naming your own copy and your keys file, in the layout of
 [primase-testdata](https://github.com/Kalmarv/primase-testdata):

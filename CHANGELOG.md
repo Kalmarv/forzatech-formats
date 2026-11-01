@@ -31,3 +31,7 @@
 - `minizip::ChunkMapRecord` now holds the record's 24-bit `id` and `resource_type` (the former `unknown_0` and
   `unknown_2`); `reference()` gives the `type << 24 | id` word the `.pvs` files use.
 - Depends on primase-foundations 0.3.1 (features `compress` and `sqlite`) from crates.io, and on quick-xml 0.42.0.
+- `particles`: the particle instances (`.particlebin`: a Grub bundle with one `PCLB` blob): each instance's name, effect,
+  position, rotation, the strings that gate it, and the chain of links through its slots, every constant, link and
+  string offset checked.
+- `gameobjs`: the named places gameplay refers to (`GameObjs.xml`): each object's id, optional guid, position and axes.

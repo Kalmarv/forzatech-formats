@@ -7,11 +7,14 @@
 //! - [`container`]: the encrypted container (the Arxan TransformIT envelope) that wraps Forza Horizon 6's game
 //!   database, its settings archives' method-22 zip entries, `sfsdata`, `NerdData.json` and the player's profile: the
 //!   36-byte header, its blocks and their MACs, and decryption with keys you supply.
+//! - [`gameobjs`]: the named places gameplay refers to (`GameObjs.xml`): each object's name, position and axes.
 //! - [`keys`]: those keys, parsed from a small text file you keep. No key ships with this crate.
 //! - [`gamedb`]: the second layer of the game database (`gamedbRC.slt`), a keystream that turns the decrypted
 //!   container into an SQLite image, and each car's stock tyre and rim sizes read from it.
 //! - [`minizip`]: the PGZP streaming archives a track's world is stored in (`GeoChunkN.minizip`), their entries
 //!   decoded, and the chunk map and contents list beside each that type and name the entries.
+//! - [`particles`]: the particle instances (`.particlebin`) a track and its routes place: effect, position, rotation
+//!   and the strings that gate them.
 //! - [`pgeo`]: the placement files (`.pgeo`) of a track's procedural world: every instance's position, rotation and
 //!   scale, its spline-deform curve, its season and variant data, and the template its block names.
 //! - [`plib`]: the template libraries (`.plib`) those blocks name: draw behaviours, model templates with the model paths
@@ -50,8 +53,10 @@
 pub mod bundle;
 pub mod container;
 pub mod gamedb;
+pub mod gameobjs;
 pub mod keys;
 pub mod minizip;
+pub mod particles;
 pub mod pgeo;
 pub mod plib;
 pub mod pvs;
@@ -87,6 +92,12 @@ pub enum Error {
     /// The bytes are not a `.pgeo` placement file this crate reads.
     #[error("pgeo: {0}")]
     Pgeo(String),
+    /// The bytes are not a `GameObjs.xml` game objects file this crate reads.
+    #[error("game objects: {0}")]
+    GameObjs(String),
+    /// The bytes are not a `.particlebin` particle instance file this crate reads.
+    #[error("particles: {0}")]
+    Particles(String),
     /// The bytes are not a `.plib` template library this crate reads.
     #[error("plib: {0}")]
     Plib(String),

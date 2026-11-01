@@ -66,6 +66,24 @@ primase_testdata::inputs! {
             about: r#"the general scene assets instance file (Steam build 25588841, 381,229 bytes): a `.pvs` with the header and 6,807 texture descriptors only; tests/pvs.rs"#,
             source: r#"the user's own install"#,
         },
+        Query::Install(Game::Fh6, Some("media/Stripped/gs/brio")) => {
+            status: Live,
+            gate: true,
+            about: r#"the open world's folder of gameplay data (Steam build 25588841; 287 files, 241 MB): `gameobjs.xml` (59 game objects) and `routedefinitions` with 168 `.particlebin` files (508 particle instances in all) beside the routes' sound scapes; tests/gameobjs.rs and tests/particles.rs"#,
+            source: r#"the user's own install"#,
+        },
+        Query::Install(Game::Fh6, Some("media/Tracks/homespace02/Ribbon_00/ParticleInstances.particlebin")) => {
+            status: Live,
+            gate: true,
+            about: r#"the home space's particle instances file (Steam build 25588841, 60 bytes): a bundle whose list holds no instance; tests/particles.rs"#,
+            source: r#"the user's own install"#,
+        },
+        Query::Install(Game::Fh6, Some("media/Tracks/homespace02/Ribbon_00/GameObjs.xml")) => {
+            status: Live,
+            gate: true,
+            about: r#"the home space's game objects file (Steam build 25588841, 104 bytes): no object; tests/gameobjs.rs"#,
+            source: r#"the user's own install"#,
+        },
         Query::Install(Game::Fh6, Some("media/NerdData/NerdData.json")) => {
             status: Live,
             gate: true,
