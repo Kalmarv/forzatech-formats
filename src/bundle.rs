@@ -51,7 +51,14 @@
 //! texture's `TXCB` and its `TXCH` metadata; a material's `MATI`, `MTPR`). A blob whose data is itself a bundle (a
 //! model's `MatI` material instances, a crowd's `ClsL`) is read with [`Bundle::parse`] on [`Blob::data`].
 //!
-//! What has been checked, and how: see `tests/bundle.rs`.
+//! What has been checked, and how: on one install of Forza Horizon 6 (Steam build 25588841), every bundle of the Tokyo
+//! track's four GeoChunks and of the zips under `media` (526,129: 196,620 models, 191,602 `.pb` and 126,527
+//! `.swatchbin` textures, 9,707 materials, 987 shaders, 682 car colour lists, 4 crowds) and every bundle nested in their
+//! blobs (1,526,529) reads with every check [`Bundle::parse`] makes holding. 16 metadata payloads have an escaped size,
+//! 11 bundles a header that ends unaligned and 8,418 an unpadded end. `tests/bundle.rs` repeats that, and compares
+//! every bundle's blobs, metadata records and payloads, nested ones included, with Doliman100's
+//! ForzaTech-extraction-tools' reading of the same bundles: all 526,129 agree (that reader takes a payload's size from
+//! the 12-bit field alone, so it sees the first 0xFFF bytes of an escaped payload).
 #![deny(
     clippy::arithmetic_side_effects,
     clippy::indexing_slicing,

@@ -26,7 +26,12 @@ It reads, from bytes or a reader you give it:
   `Megatexture.xml`, `Livery.xml`, `DecalManager.xml` and the rest): their `Data` and `Settings` blocks, properties,
   lists and maps, every value kept as the text the file stores (`settings::DatabaseFile::parse`).
 
-More of the engine's formats (its models, materials, textures and placements) will follow. Used by
+- **Grub bundles**, the container the models (`.modelbin`), textures (`.pb`, `.swatchbin`), materials
+  (`.materialbin`), shaders (`.shaderbin`), crowds and car colour lists are stored in: the header, every blob's record,
+  metadata records and data, and the bundles nested in blobs (a model's material instances), with every byte of the
+  layout checked (`bundle::Bundle::parse`). What a blob holds is read by the formats' own modules.
+
+More of the engine's formats (the contents of its models, materials, textures and placements) will follow. Used by
 [primase](https://github.com/Kalmarv/primase), a game-asset conversion library.
 
 ## Example
@@ -102,6 +107,13 @@ Your program reads the file and passes its text to `Keys::parse`; the crate itse
 - **The settings files**: the install's zips hold 72 `DatabaseFile` files (in `Rendering.zip` and
   `GameTunableSettings.zip`); 71 read, and `Rendering.zip`'s `Cubemap.xml` is refused because its last `Settings`
   block is closed by `</property>`, which is not well-formed XML. `tests/settings.rs` repeats this.
+
+- **The Grub bundles** read on one install (Steam build 25588841): all 526,129 bundles of the Tokyo track's GeoChunks
+  and the zips under `media` (196,620 models, 191,602 `.pb` and 126,527 `.swatchbin` textures, 9,707 materials, 987
+  shaders, 682 car colour lists and 4 crowds), and the 1,526,529 bundles nested in their blobs, read with no refusals.
+  Each gives the same blobs, metadata records and payloads as Doliman100's ForzaTech-extraction-tools reads (whose
+  reader sees the first 0xFFF bytes of the 16 payloads whose size is escaped). `tests/bundle.rs` repeats this on your
+  install (a sample, or every bundle with `[run] gate = 'full'`).
 
 ## What it does not do
 
