@@ -584,8 +584,8 @@ dependencies = [
 
 [[package]]
 name = "primase-testdata"
-version = "0.1.6"
-source = "git+https://github.com/Kalmarv/primase-testdata?rev=b04da4f7896cf00b6c5e12f485e1403a8bb8ca00#b04da4f7896cf00b6c5e12f485e1403a8bb8ca00"
+version = "0.1.7"
+source = "git+https://github.com/Kalmarv/primase-testdata?rev=de64f982676c01dd133893d53ab5ed557d954ad6#de64f982676c01dd133893d53ab5ed557d954ad6"
 dependencies = [
  "blake3",
  "serde_json",
