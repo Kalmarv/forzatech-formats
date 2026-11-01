@@ -34,8 +34,11 @@
 //! `materials`, the seasons' forms of each material, which the manifest does not list. Two names refer to one:
 //!
 //! - a model's material instance names its parent material by its source's game path, `Game:\Media\<source less
-//!   .material>.materialbin`, and a material its shader the same way, `.shaderbin` for `.shader`:
-//!   [`AssetManifest::material_for`] and [`AssetManifest::shader_for`] look one up by that path, ASCII case ignored;
+//!   .material>.materialbin`, and a material names its shader, whose source is `<folder>\<family>.shader`, as
+//!   `Game:\Media\<folder>\<family>\<family>.shaderbin` (the family once more as a folder):
+//!   [`AssetManifest::material_for`] and [`AssetManifest::shader_for`] look one up by that path, ASCII case ignored.
+//!   Every shader path the materials of the install's three zips give has that form; those no manifest lists are
+//!   under `_library\shaderspg`, whose shaders are kept in other archives;
 //! - a track's hand-placed instance file names its shaders and materials by the entry,
 //!   `game:\media\tracks\<track>\bin\<name>`.
 //!
@@ -235,9 +238,16 @@ impl AssetManifest {
         }
     }
 
-    /// The shader a game path (`Game:\Media\...\<name>.shaderbin`) names.
+    /// The shader a game path (`Game:\Media\<folder>\<family>\<family>.shaderbin`) names: the one whose source is
+    /// `<folder>\<family>.shader`. `None` for a path not of that form.
     pub fn shader_for(&self, game_path: &str) -> Option<&Asset> {
-        let k = key(game_path, ".shaderbin", ".shader")?;
+        let k = key(game_path, ".shaderbin", "")?;
+        let (folder, family) = k.rsplit_once('\\')?;
+        let (folder, again) = folder.rsplit_once('\\')?;
+        if again != family {
+            return None;
+        }
+        let k = format!("{folder}\\{family}.shader");
         self.shaders.get(*self.shader_index.get(&k)?)
     }
 
@@ -435,9 +445,17 @@ mod tests {
             (1, true, true)
         );
         assert_eq!(
-            m.shader_for(r"Game:\Media\_library\shaders\pg_fx\EmissiveOnly.shaderbin")
+            m.shader_for(r"Game:\Media\_library\shaders\pg_fx\EmissiveOnly\emissiveonly.shaderbin")
                 .map(|a| a.name.as_str()),
             Some(r"shaders\_0x00000000\emissiveonly.shaderbin")
+        );
+        assert!(
+            m.shader_for(r"Game:\Media\_library\shaders\pg_fx\emissiveonly.shaderbin")
+                .is_none()
+        );
+        assert!(
+            m.shader_for(r"Game:\Media\_library\shaders\pg_fx\other\emissiveonly.shaderbin")
+                .is_none()
         );
         assert_eq!(
             m.material_for(r"Game:\Media\Tracks\Brio\materials\a\b.materialbin")
