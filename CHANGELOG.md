@@ -14,6 +14,11 @@
 - `bundle`: the Grub bundles models, textures, materials, shaders, crowds and car colour lists are stored in: the
   header, the blob records, the metadata records (with the escaped size of a payload of 0xFFF bytes or more) and each
   blob's data, every byte of the layout checked, and the bundles nested in blobs read the same way.
+- `modelbin`: the models (`.modelbin`) built on `bundle`: `Modl`, `Skel`, `Mrph`, `Mesh` (versions 1.12 and 1.13),
+  `VLay` and `ILay`, `IndB`, `VerB`, `MBuf` and `Skin`, and `MatI` (returned as the nested bundle, or nothing for a
+  slot with no instance), every field accounted for and every reference between blobs checked; and one mesh's indices
+  and vertices decoded as stored (positions, normals, tangents, texture coordinates, colours, morph deltas and
+  skinning weights) without choosing a level of detail, an axis or a unit.
 - `gamedb::car_wheels`: each car's stock tyre width, aspect ratio and rim diameter, front and rear, and its stock
   wheel, from the decrypted database (read through primase-foundations' `sqlite`).
 - `pgeo`: the per-cell placement files (`.pgeo`): header (kind, bounding box, category, route, gameplay tag, season

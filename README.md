@@ -41,8 +41,13 @@ It reads, from bytes or a reader you give it:
   each shader and material, by the source path it was built from, so the game path a model's material instance names
   its parent by resolves to an entry; beside a track, its textures (by the path hash materials name them by) and its
   models with the LOD rows of the instance file that use them.
+- **The models** (`.modelbin`): the header, the skeleton, the meshes (levels of detail, index range, vertex layout and
+  buffers, material ids, texture coordinate transforms, position scale and offset), the vertex layouts, the index,
+  vertex, morph and skinning buffers and the morph target names, every reference between them checked
+  (`modelbin::Model::parse`), and one mesh's indices and vertices decoded as stored, with no axis, unit or level of
+  detail chosen (`Model::mesh_data`). A material instance is returned as the bundle it is, for a materials reader.
 
-More of the engine's formats (the contents of its models, materials and textures, and the rest of a track's placements)
+More of the engine's formats (the contents of its materials and textures, and the rest of a track's placements)
 will follow. Used by [primase](https://github.com/Kalmarv/primase), a game-asset conversion library.
 
 ## Example
@@ -155,6 +160,16 @@ Your program reads the file and passes its text to `Keys::parse`; the crate itse
   Each gives the same blobs, metadata records and payloads as Doliman100's ForzaTech-extraction-tools reads (whose
   reader sees the first 0xFFF bytes of the 16 payloads whose size is escaped). `tests/bundle.rs` repeats this on your
   install (a sample, or every bundle with `[run] gate = 'full'`).
+
+- **The models** read on one install (Steam build 25588841): all 113,868 `.modelbin` of the Tokyo track's `GeoChunk0`
+  (407,461 meshes) and all 82,752 under `media` in zips (1,339,215 meshes) read with no refusals, and every mesh's
+  indices and vertices decode with every index inside its buffer. Nenkai's ForzaTools reads 75,108 of the Tokyo models
+  (it throws on 5,617 with a material slot that has no instance and 33,143 in its mesh reader, written for Forza Horizon
+  5); on those the header, skeleton, meshes, layouts, buffers and material slots agree field by field. Doliman100's
+  importer reads 110,591 (it raises on 3,208: 3,140 with a mesh of several material groups, which it misreads, and 68
+  with a vertex whose stored normal is zero; 69 more models with several material groups are not compared); on those
+  the meshes agree and 444,752 sampled vertices decode to the same values. `tests/modelbin.rs` repeats this on your
+  install (a sample, or every model with `[run] gate = 'full'`).
 
 ## What it does not do
 

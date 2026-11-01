@@ -14,6 +14,8 @@
 //! - [`keys`]: those keys, parsed from a small text file you keep. No key ships with this crate.
 //! - [`gamedb`]: the second layer of the game database (`gamedbRC.slt`), a keystream that turns the decrypted
 //!   container into an SQLite image, and each car's stock tyre and rim sizes read from it.
+//! - [`modelbin`]: models (`.modelbin`): their header, skeleton, material instances (as bundles), meshes, vertex
+//!   layouts and buffers, as stored, and one mesh's indices and vertices decoded.
 //! - [`minizip`]: the PGZP streaming archives a track's world is stored in (`GeoChunkN.minizip`), their entries
 //!   decoded, and the chunk map and contents list beside each that type and name the entries.
 //! - [`particles`]: the particle instances (`.particlebin`) a track and its routes place: effect, position, rotation
@@ -60,6 +62,7 @@ pub mod gamedb;
 pub mod gameobjs;
 pub mod keys;
 pub mod minizip;
+pub mod modelbin;
 pub mod particles;
 pub mod pgeo;
 pub mod plib;
@@ -91,6 +94,9 @@ pub enum Error {
     /// The bytes are not a Grub bundle this crate reads.
     #[error("bundle: {0}")]
     Bundle(String),
+    /// The bytes are not a model this crate reads, or a mesh does not decode.
+    #[error("modelbin: {0}")]
+    ModelBin(String),
     /// The bytes are not a PGZP archive's directory, a chunk map or a contents list, or an entry does not decode.
     #[error("minizip: {0}")]
     MiniZip(String),

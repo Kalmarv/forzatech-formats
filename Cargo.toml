@@ -41,7 +41,7 @@ publish = true
 [workspace.dependencies]
 primase-foundations = { version = "0.3.1", features = ["compress", "sqlite"] }
 quick-xml = { version = "=0.42.0", default-features = false }
-primase-testdata = { version = "0.1.7", git = "https://github.com/Kalmarv/primase-testdata", rev = "d3e41a084b71b79aaaa7681751c3d632b5b714f7" }
+primase-testdata = { version = "0.1.7", git = "https://github.com/Kalmarv/primase-testdata", rev = "dfc1948b1b1b1a737a5521bb232b374c125b2647" }
 thiserror = { version = "=2.0.21", default-features = false, features = ["std"] }
 aes = { version = "=0.9.3", default-features = false }
 cmac = { version = "=0.8.0", default-features = false }
