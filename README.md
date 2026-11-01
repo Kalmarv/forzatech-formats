@@ -64,9 +64,11 @@ Your program reads the file and passes its text to `Keys::parse`; the crate itse
   67 encrypted entries of `Rendering.zip`.
 - The AES-CBC, AES-CMAC and HKDF-SHA256 steps match their standards' published vectors (NIST SP 800-38A, RFC 4493,
   RFC 5869), and the game database keystream matches values worked by hand with an independent CRC-32.
-- **Not yet checked against real files:** how those steps chain (which IV each block and MAC uses, what the header's
-  MAC covers) follows a community tool's description. `tests/real_data.rs` checks it on a real install with your keys.
-  Until that has run, treat decryption as unproven.
+- **The chaining is checked on files the game wrote**, not only taken from the description: for every container
+  checked (a profile and a backup, estate and flyer blobs, `sfsdata`, `gamedbRC.slt`, `NerdData.json`, and five
+  encrypted settings entries) the header MAC authenticates under its usage's key and every block's MAC matches, and the
+  plaintext is the promised inner format — zlib for a profile, raw DEFLATE for a settings entry, an SQLite image after
+  the keystream for the game database. `tests/real_data.rs` repeats it on your own install with your keys.
 - For the game database, whether the header's MAC and padding field mean what they mean in small containers is not
   established, so `gamedb::decrypt` does not rely on them.
 
