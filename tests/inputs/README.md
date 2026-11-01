@@ -14,7 +14,7 @@ fails when they differ); [the README](../../README.md#running-the-tests) says ho
 | key | gate | about | source |
 | --- | --- | --- | --- |
 | `installs.fh6` | - | Forza Horizon 6's install folder (the folder that holds `media`) | the user's own install |
-| `keys.fh6` | - | the user's Forza Horizon 6 container keys: a text file in the layout `keys::Keys::parse` reads, with the usages `GameDB` and `General` and `gamedb.scramble` | the user's own copy of the keys; none is distributed here |
+| `keys.fh6` | yes | the user's Forza Horizon 6 container keys: a text file in the layout `keys::Keys::parse` reads, with the usages `GameDB` and `General` and `gamedb.scramble` | the user's own copy of the keys; none is distributed here |
 | `scratch.root` | - | where real-data tests write their outputs (the OS temporary folder when unset) | - |
 
 #### Oracle sets (`<oracles.root>/<set>/<game>/`)

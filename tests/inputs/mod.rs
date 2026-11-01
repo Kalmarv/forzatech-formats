@@ -21,7 +21,7 @@ primase_testdata::inputs! {
         Fh6 {
             about: "the user's Forza Horizon 6 container keys: a text file in the layout `keys::Keys::parse` reads, with the usages `GameDB` and `General` and `gamedb.scramble`",
             source: "the user's own copy of the keys; none is distributed here",
-            gate: false,
+            gate: true,
         },
     }
     tools {}

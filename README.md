@@ -15,6 +15,11 @@ It reads, from bytes or a reader you give it:
   [primase-foundations](https://github.com/Kalmarv/primase-foundations)), and the two files beside each archive that
   type and name its entries (`ChunkMapN.dat`, `ChunkContentsMiniZipN.txt`). `minizip::MiniZip::read` reads only the
   directory; an entry is read when you ask for it, so a 40 GB archive costs a few megabytes to open.
+- **The zip archives** the settings, cars, shaders and libraries are kept in (`media/*.zip` and below): PKWARE zip
+  with ZIP64 records where an archive needs them, every local header checked against its central record, stored and
+  DEFLATE entries decoded, and the encrypted entries (method 22: a small-block container around raw DEFLATE)
+  decrypted with your keys, every MAC checked. Every decode must give the entry's size and the CRC-32 its archive
+  stores.
 
 More of the engine's formats (its models, materials, textures and placements) will follow. Used by
 [primase](https://github.com/Kalmarv/primase), a game-asset conversion library.
@@ -81,12 +86,15 @@ Your program reads the file and passes its text to `Keys::parse`; the crate itse
   position, sizes, method, padding, folder and name, and every folder index value, equal what Nenkai's ForzaTools
   reads from the same files, and 1,800 sampled entries decode to the same bytes (ForzaTools for stored and DEFLATE
   entries, K4os.Compression.LZ4 for LZ4 ones). `tests/minizip.rs` repeats this on your install.
+- **The zip archives** read on one install (Steam build 25588841): all 9,076 zips under `media` (402,283 entries:
+  371,516 DEFLATE, 29,250 encrypted, 1,517 stored; one archive with ZIP64 records) pass every check the reader makes.
+  Every encrypted entry decrypts with the `General` usage, its MACs matching and its inflated bytes matching its
+  size and CRC-32. `tests/zip.rs` repeats this on your install.
 
 ## What it does not do
 
 - It does not encrypt or re-encrypt, and it does not write any file or write into an archive.
 - It does not ship, find or derive keys.
-- It does not yet read the zip archives the encrypted entries live in, or inflate them.
 
 ## Running the tests
 
@@ -94,7 +102,8 @@ Your program reads the file and passes its text to `Keys::parse`; the crate itse
 cargo test --workspace
 ```
 
-runs the tests that need no game file. The tests that read a real install, `tests/real_data.rs`, skip with a line
+runs the tests that need no game file. The tests that read a real install (`tests/real_data.rs`, `tests/minizip.rs`,
+`tests/zip.rs`) skip with a line
 naming what they need when `GAME_DATA` is not set. To run them, point the `GAME_DATA` environment variable at a TOML
 file naming your own copy and your keys file, in the layout of
 [primase-testdata](https://github.com/Kalmarv/primase-testdata):

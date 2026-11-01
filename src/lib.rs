@@ -10,6 +10,8 @@
 //!   container into an SQLite image.
 //! - [`minizip`]: the PGZP streaming archives a track's world is stored in (`GeoChunkN.minizip`), their entries
 //!   decoded, and the chunk map and contents list beside each that type and name the entries.
+//! - [`zip`]: the zip archives the settings, cars, shaders and libraries are kept in, their entries decoded and, with
+//!   keys you supply, their encrypted (method 22) entries decrypted.
 //!
 //! Every read is checked: untrusted bytes give an [`Error`] naming what was expected, never a panic.
 //!
@@ -35,6 +37,7 @@ pub mod container;
 pub mod gamedb;
 pub mod keys;
 pub mod minizip;
+pub mod zip;
 
 #[cfg(test)]
 #[path = "../tests/inputs/mod.rs"]
@@ -56,6 +59,9 @@ pub enum Error {
     /// The bytes are not a PGZP archive's directory, a chunk map or a contents list, or an entry does not decode.
     #[error("minizip: {0}")]
     MiniZip(String),
+    /// The bytes are not a zip archive this crate reads, or an entry does not decode.
+    #[error("zip: {0}")]
+    Zip(String),
     /// Reading from the reader the caller gave failed.
     #[error("I/O: {0}")]
     Io(String),
