@@ -30,6 +30,10 @@ primase_testdata::inputs! {
             about: "Nenkai ForzaTools' readings of the game's files: for `minizip`, per GeoChunk the header fields, the folder index and every entry (offset, sizes, method, padding, folder field, chunk-map record, name) as TSV, and the SHA-256 of sampled entries' contents",
             source: "independent: Nenkai/ForzaTools 269a822 (MIT, `ForzaTools.PlaygroundMiniZip`, opened read-only and built for .NET 8), with K4os.Compression.LZ4 1.3.8 decoding the method-31 entries it locates, through a small dump harness that is not part of this repository",
         },
+        Doliman = "doliman" {
+            about: "Doliman100 ForzaTech-extraction-tools' readings of the game's files: for `bundle`, every Grub bundle's blobs and metadata as that library's bundle classes read them, one SHA-256 per bundle and every 100th bundle in full, as TSV",
+            source: "independent: Doliman100/ForzaTech-extraction-tools d126767 (GPL-3.0, the `Bundle`, `Blob` and `Metadata` classes of `scripts/modelbin_importer.py`, unchanged), through a small dump harness that is not part of this repository; the bundles' bytes come from this crate's archive readers, checked by tests/minizip.rs and tests/zip.rs",
+        },
     }
     declared {
         Query::Install(Game::Fh6, Some("media/Tracks/Brio")) => {
@@ -43,6 +47,12 @@ primase_testdata::inputs! {
             gate: true,
             about: r#"ForzaTools' reading of installs.fh6/media/Tracks/Brio's four GeoChunks: `chunks.tsv`, `GeoChunkN.indices.tsv`, `GeoChunkN.entries.tsv` (495,394 rows) and `samples.tsv` (200 entries of each method of each chunk, 1,800 rows); tests/minizip.rs"#,
             source: r#"independent: ForzaTools 269a822's `MiniZip`, with K4os.Compression.LZ4 1.3.8 for method 31, through a dump harness kept with the private oracle tools"#,
+        },
+        Query::Oracle(OracleSet::Doliman, Game::Fh6, "bundle") => {
+            status: Live,
+            gate: true,
+            about: r#"Doliman100's reading of every Grub bundle of installs.fh6 (the Tokyo track's GeoChunks and every zip under `media`): `bundles.tsv` (one row per bundle: source, entry, name, blob and nested-bundle counts, the SHA-256 of its reading), `sample.tsv` (every 100th bundle's reading line by line) and `errors.tsv`; tests/bundle.rs"#,
+            source: r#"independent: ForzaTech-extraction-tools d126767's bundle classes, through a dump harness kept with the private oracle tools"#,
         },
         Query::Install(Game::Fh6, Some("media/Stripped/gamedbRC.slt")) => {
             status: Live,

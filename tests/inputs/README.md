@@ -22,6 +22,7 @@ fails when they differ); [the README](../../README.md#running-the-tests) says ho
 | set | about | source |
 | --- | --- | --- |
 | `oracles.forzatools` | Nenkai ForzaTools' readings of the game's files: for `minizip`, per GeoChunk the header fields, the folder index and every entry (offset, sizes, method, padding, folder field, chunk-map record, name) as TSV, and the SHA-256 of sampled entries' contents | independent: Nenkai/ForzaTools 269a822 (MIT, `ForzaTools.PlaygroundMiniZip`, opened read-only and built for .NET 8), with K4os.Compression.LZ4 1.3.8 decoding the method-31 entries it locates, through a small dump harness that is not part of this repository |
+| `oracles.doliman` | Doliman100 ForzaTech-extraction-tools' readings of the game's files: for `bundle`, every Grub bundle's blobs and metadata as that library's bundle classes read them, one SHA-256 per bundle and every 100th bundle in full, as TSV | independent: Doliman100/ForzaTech-extraction-tools d126767 (GPL-3.0, the `Bundle`, `Blob` and `Metadata` classes of `scripts/modelbin_importer.py`, unchanged), through a small dump harness that is not part of this repository; the bundles' bytes come from this crate's archive readers, checked by tests/minizip.rs and tests/zip.rs |
 
 #### Declared files
 
@@ -29,7 +30,9 @@ fails when they differ); [the README](../../README.md#running-the-tests) says ho
 | --- | --- | --- | --- | --- |
 | `installs.fh6/media/Tracks/Brio` | live | yes | the Tokyo track's folder (Steam build 25588841): `GeoChunk0.minizip` to `GeoChunk3.minizip` (39.7, 3.6, 49.4 and 4.8 GB; 411,013, 3,065, 79,840 and 1,476 entries), each with its `ChunkMapN.dat` and `ChunkContentsMiniZipN.txt`; tests/minizip.rs | the user's own install |
 | `oracles.forzatools.fh6/minizip` | live | yes | ForzaTools' reading of installs.fh6/media/Tracks/Brio's four GeoChunks: `chunks.tsv`, `GeoChunkN.indices.tsv`, `GeoChunkN.entries.tsv` (495,394 rows) and `samples.tsv` (200 entries of each method of each chunk, 1,800 rows); tests/minizip.rs | independent: ForzaTools 269a822's `MiniZip`, with K4os.Compression.LZ4 1.3.8 for method 31, through a dump harness kept with the private oracle tools |
+| `oracles.doliman.fh6/bundle` | live | yes | Doliman100's reading of every Grub bundle of installs.fh6 (the Tokyo track's GeoChunks and every zip under `media`): `bundles.tsv` (one row per bundle: source, entry, name, blob and nested-bundle counts, the SHA-256 of its reading), `sample.tsv` (every 100th bundle's reading line by line) and `errors.tsv`; tests/bundle.rs | independent: ForzaTech-extraction-tools d126767's bundle classes, through a dump harness kept with the private oracle tools |
 | `installs.fh6/media/Stripped/gamedbRC.slt` | live | yes | the game database (Steam build 25588841, 16,123,860 bytes): a large-block container, read by tests/real_data.rs to an SQLite image of 207 tables, every table read whole and every car's stock wheels read | the user's own install |
 | `installs.fh6/media/NerdData/NerdData.json` | live | yes | a one-block small container, read by tests/real_data.rs with every MAC checked | the user's own install |
 
 <!-- end of real-data inputs -->
+

@@ -2,6 +2,8 @@
 //!
 //! This crate reads, from bytes or a reader you give it (it opens no file itself):
 //!
+//! - [`bundle`]: the Grub bundles models, textures, materials and shaders are stored in: their blobs, metadata
+//!   records and data, as stored.
 //! - [`container`]: the encrypted container (the Arxan TransformIT envelope) that wraps Forza Horizon 6's game
 //!   database, its settings archives' method-22 zip entries, `sfsdata`, `NerdData.json` and the player's profile: the
 //!   36-byte header, its blocks and their MACs, and decryption with keys you supply.
@@ -35,6 +37,7 @@
 #![deny(clippy::disallowed_methods, clippy::disallowed_types)]
 #![deny(missing_docs)]
 
+pub mod bundle;
 pub mod container;
 pub mod gamedb;
 pub mod keys;
@@ -59,6 +62,9 @@ pub enum Error {
         /// The header, or the block at an index.
         what: String,
     },
+    /// The bytes are not a Grub bundle this crate reads.
+    #[error("bundle: {0}")]
+    Bundle(String),
     /// The bytes are not a PGZP archive's directory, a chunk map or a contents list, or an entry does not decode.
     #[error("minizip: {0}")]
     MiniZip(String),
