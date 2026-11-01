@@ -39,7 +39,7 @@ primase_testdata::inputs! {
         Query::Install(Game::Fh6, Some("media/Tracks/Brio")) => {
             status: Live,
             gate: true,
-            about: r#"the Tokyo track's folder (Steam build 25588841): `GeoChunk0.minizip` to `GeoChunk3.minizip` (39.7, 3.6, 49.4 and 4.8 GB; 411,013, 3,065, 79,840 and 1,476 entries), each with its `ChunkMapN.dat` and `ChunkContentsMiniZipN.txt`; tests/minizip.rs"#,
+            about: r#"the Tokyo track's folder (Steam build 25588841): `GeoChunk0.minizip` to `GeoChunk3.minizip` (39.7, 3.6, 49.4 and 4.8 GB; 411,013, 3,065, 79,840 and 1,476 entries), each with its `ChunkMapN.dat` and `ChunkContentsMiniZipN.txt`; tests/minizip.rs, tests/pgeo.rs, tests/plib.rs, tests/pvs.rs"#,
             source: r#"the user's own install"#,
         },
         Query::Oracle(OracleSet::ForzaTools, Game::Fh6, "minizip") => {
@@ -58,6 +58,12 @@ primase_testdata::inputs! {
             status: Live,
             gate: true,
             about: r#"the game database (Steam build 25588841, 16,123,860 bytes): a large-block container, read by tests/real_data.rs to an SQLite image of 207 tables, every table read whole and every car's stock wheels read"#,
+            source: r#"the user's own install"#,
+        },
+        Query::Install(Game::Fh6, Some("media/Stripped/gs/generalsceneassets.pvs")) => {
+            status: Live,
+            gate: true,
+            about: r#"the general scene assets instance file (Steam build 25588841, 381,229 bytes): a `.pvs` with the header and 6,807 texture descriptors only; tests/pvs.rs"#,
             source: r#"the user's own install"#,
         },
         Query::Install(Game::Fh6, Some("media/NerdData/NerdData.json")) => {

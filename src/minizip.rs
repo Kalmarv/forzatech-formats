@@ -498,15 +498,26 @@ fn io(what: &'static str) -> impl Fn(std::io::Error) -> Error {
     move |e| Error::Io(format!("{what}: {e}"))
 }
 
-/// One record of `ChunkMapN.dat`, the entry of the same index's resource type.
+/// One record of `ChunkMapN.dat`, the entry of the same index's resource type and id: a little-endian u32,
+/// `resource_type << 24 | id`.
+///
+/// The id numbers the resources of one type across the track's chunk maps: on the Forza Horizon 6 Tokyo track no
+/// (type, id) pair is in two records of its four chunk maps, and other files name an entry by the whole u32
+/// ([`ChunkMapRecord::reference`]): a `.pvs` model number is the id of a type-4 (`.modelbin`) record, and a `.pvs`
+/// cell record's second reference is a type-12 (`.pvsz`) record.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ChunkMapRecord {
-    /// The first two bytes (u16), not understood.
-    pub unknown_0: u16,
-    /// The third byte, not understood.
-    pub unknown_2: u8,
-    /// The resource type (4 a `.modelbin`, 5 a `.pb` texture, 0 a `.pgeo` placement file, and so on).
+    /// The id (24 bits).
+    pub id: u32,
+    /// The resource type (4 a `.modelbin`, 5 a `.pb` texture, 0 a `.pgeo` placement file, 12 a `.pvsz`, and so on).
     pub resource_type: u8,
+}
+
+impl ChunkMapRecord {
+    /// The record as other files name it: `resource_type << 24 | id`.
+    pub fn reference(&self) -> u32 {
+        (u32::from(self.resource_type) << 24) | self.id
+    }
 }
 
 /// `ChunkMapN.dat`: one 4-byte record per entry of `GeoChunkN`. Refused: a length other than 4 × `entry_count`.
@@ -521,8 +532,7 @@ pub fn parse_chunk_map(bytes: &[u8], entry_count: u32) -> Result<Vec<ChunkMapRec
     Ok(records
         .iter()
         .map(|&[a, b, c, d]| ChunkMapRecord {
-            unknown_0: u16::from_le_bytes([a, b]),
-            unknown_2: c,
+            id: u32::from_le_bytes([a, b, c, 0]),
             resource_type: d,
         })
         .collect())
@@ -812,17 +822,16 @@ mod tests {
             map,
             [
                 ChunkMapRecord {
-                    unknown_0: 0x0201,
-                    unknown_2: 3,
+                    id: 0x03_0201,
                     resource_type: 4
                 },
                 ChunkMapRecord {
-                    unknown_0: 0,
-                    unknown_2: 0,
+                    id: 0,
                     resource_type: 5
                 },
             ]
         );
+        assert_eq!(map[0].reference(), 0x0403_0201);
         assert!(parse_chunk_map(&[0; 7], 2).is_err());
     }
 

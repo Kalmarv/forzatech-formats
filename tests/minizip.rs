@@ -220,16 +220,16 @@ fn geochunks_read_as_forzatools_reads_them() {
                 u64::from(e.method.number()),
                 u64::from(e.padding),
                 u64::from(e.folder_low),
-                u64::from(m.unknown_0),
-                u64::from(m.unknown_2),
+                u64::from(m.id),
                 u64::from(m.resource_type),
             ];
-            // ForzaTools reads the chunk map's first two bytes as an i16
-            let unknown_0 = row[8].parse::<i16>().unwrap().cast_unsigned();
+            // ForzaTools reads the chunk map record as an i16 and two bytes; the id is the i16's bits and the first byte
+            let low = row[8].parse::<i16>().unwrap().cast_unsigned();
+            let id = u64::from(low) | num(&row[9]) << 16;
             let theirs: Vec<u64> = row[..8]
                 .iter()
                 .map(|s| num(s))
-                .chain([u64::from(unknown_0), num(&row[9]), num(&row[10])])
+                .chain([id, num(&row[10])])
                 .collect();
             assert_eq!(theirs, ours, "GeoChunk{n} entry {k}");
             // ForzaTools' name: the line before its '|', every "<PREZIPPED>" and "d:\" removed

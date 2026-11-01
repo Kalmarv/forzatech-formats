@@ -25,14 +25,20 @@ It reads, from bytes or a reader you give it:
 - **The settings files** those encrypted entries hold whose root is `DatabaseFile` (`Rendering.zip`'s
   `Megatexture.xml`, `Livery.xml`, `DecalManager.xml` and the rest): their `Data` and `Settings` blocks, properties,
   lists and maps, every value kept as the text the file stores (`settings::DatabaseFile::parse`).
-
 - **Grub bundles**, the container the models (`.modelbin`), textures (`.pb`, `.swatchbin`), materials
   (`.materialbin`), shaders (`.shaderbin`), crowds and car colour lists are stored in: the header, every blob's record,
   metadata records and data, and the bundles nested in blobs (a model's material instances), with every byte of the
   layout checked (`bundle::Bundle::parse`). What a blob holds is read by the formats' own modules.
+- **The placements of a track**, as the Tokyo track stores them: the per-cell placement files (`pgeo`: header, blocks
+  of instance records with fixed-point positions and rotation, spline-deform curves, source ranges, crowd splines), the
+  template libraries their block names refer to (`plib`), and the hand-placed instance file (`pvs`: transforms, LOD
+  rows and profiles, instances, gameplay records, model bounds). `track::Track` indexes a track's GeoChunk entries from
+  its chunk maps, so a model number, a cell's reference or a template's model path resolves to the entry that holds it,
+  and `Pgeo::instances_in` and `pvs::World::instances_in` give the placements in one x/z box. Every season's variant is
+  read; which one to draw is the caller's choice.
 
-More of the engine's formats (the contents of its models, materials, textures and placements) will follow. Used by
-[primase](https://github.com/Kalmarv/primase), a game-asset conversion library.
+More of the engine's formats (the contents of its models, materials and textures, and the rest of a track's placements)
+will follow. Used by [primase](https://github.com/Kalmarv/primase), a game-asset conversion library.
 
 ## Example
 
@@ -107,6 +113,24 @@ Your program reads the file and passes its text to `Keys::parse`; the crate itse
 - **The settings files**: the install's zips hold 72 `DatabaseFile` files (in `Rendering.zip` and
   `GameTunableSettings.zip`); 71 read, and `Rendering.zip`'s `Cubemap.xml` is refused because its last `Settings`
   block is closed by `</property>`, which is not well-formed XML. `tests/settings.rs` repeats this.
+- **The placement files**: no third-party reader of them exists, so the check is a census over every instance of one
+  install (Steam build 25588841), with the strict readers refusing any value or byte the layouts do not account for.
+  Our own earlier exports are not a check. **Template libraries:** all 65 version 38 libraries (545 draw behaviours,
+  19,776 model templates, 47,835 placement templates) and the 5 version 9 group libraries read to their last byte
+  (`tests/plib.rs`); 12,566 of the 19,776 model paths name a model whose files are in the track's GeoChunks and 7,210
+  (30 of them empty) name none, so the files do not hold them. **Hand-placed instances:** `brio_00.pvs` (154,254
+  instances, 111,452 transforms, 593,706 LOD rows, 134,330 models) and the texture-only `generalsceneassets.pvs` read
+  to their last byte with every reference inside what it refers to; the third `.pvs` of the install, the home
+  space's, is version 0x63 and is refused. A model number is the id of the type-4 record of the chunk map: all 113,868
+  `.modelbin` entries are named by one, and 20,462 of the 134,330 numbers (19,436 of them used by LOD rows) name no
+  entry of the install. Each of the 13,702 `.pvsz` entries is named by three cell records (`tests/pvs.rs`).
+  **Placement files:** All 96,234 `.pgeo` files (665,298 blocks, 29,164,671 instance
+  records, 243,394 spline curves, 244 crowd splines) read to their last byte with no refusal (`tests/pgeo.rs`, every
+  file with `[run] gate = 'full'`); every position lies inside its file's header box, every source range names a
+  placement template, and 337,778 records lie outside the cell the file is kept under. In 37,066 instance-seasons the
+  block name is in no model template of the category's library (27 winter `GRASSTEMPLATE` names) and in 3,579 it is in
+  two; they are counted, not refused. The placements in one box, read from the files whose header box may hold some,
+  are those read from every file (Shibuya Scramble box: 297 files, 68,556 instances, 30 splines).
 
 - **The Grub bundles** read on one install (Steam build 25588841): all 526,129 bundles of the Tokyo track's GeoChunks
   and the zips under `media` (196,620 models, 191,602 `.pb` and 126,527 `.swatchbin` textures, 9,707 materials, 987
@@ -119,6 +143,8 @@ Your program reads the file and passes its text to `Keys::parse`; the crate itse
 
 - It does not encrypt or re-encrypt, and it does not write any file or write into an archive.
 - It does not ship, find or derive keys.
+- It does not read the hand-placed `.pvsz` files, the track's cameras, `.hex` or `.deform_ban` files, `GameObjs.xml` or
+  `ParticleInstances.particlebin`. Where a placement file's field is not understood it keeps the raw value and says so.
 
 ## Running the tests
 
@@ -127,7 +153,7 @@ cargo test --workspace
 ```
 
 runs the tests that need no game file. The tests that read a real install (`tests/real_data.rs`, `tests/minizip.rs`,
-`tests/zip.rs`, `tests/settings.rs`) skip with a line
+`tests/zip.rs`, `tests/settings.rs`, `tests/bundle.rs`, `tests/pgeo.rs`, `tests/plib.rs`, `tests/pvs.rs`) skip with a line
 naming what they need when `GAME_DATA` is not set. To run them, point the `GAME_DATA` environment variable at a TOML
 file naming your own copy and your keys file, in the layout of
 [primase-testdata](https://github.com/Kalmarv/primase-testdata):

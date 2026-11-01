@@ -12,8 +12,18 @@
 //!   container into an SQLite image, and each car's stock tyre and rim sizes read from it.
 //! - [`minizip`]: the PGZP streaming archives a track's world is stored in (`GeoChunkN.minizip`), their entries
 //!   decoded, and the chunk map and contents list beside each that type and name the entries.
+//! - [`pgeo`]: the placement files (`.pgeo`) of a track's procedural world: every instance's position, rotation and
+//!   scale, its spline-deform curve, its season and variant data, and the template its block names.
+//! - [`plib`]: the template libraries (`.plib`) those blocks name: draw behaviours, model templates with the model paths
+//!   they list, placement templates, and the group libraries of the `Placement` folders.
+//! - [`pvs`]: the hand-placed instance file (`.pvs`): the instances not placed by a rule, with their transforms, LOD
+//!   rows, models, textures and clips.
 //! - [`settings`]: the `DatabaseFile` settings XML of the encrypted render and game settings entries, read as
 //!   stored.
+//! - [`track`]: the index of a track's GeoChunk entries by chunk map reference and by model path, which the placement
+//!   files' model references resolve through.
+//! - [`world`]: the world frame the placement files share: fixed-point positions, half floats, x/z boxes, the cell
+//!   grid and the seasons.
 //! - [`zip`]: the zip archives the settings, cars, shaders and libraries are kept in, their entries decoded and, with
 //!   keys you supply, their encrypted (method 22) entries decrypted.
 //!
@@ -42,7 +52,13 @@ pub mod container;
 pub mod gamedb;
 pub mod keys;
 pub mod minizip;
+pub mod pgeo;
+pub mod plib;
+pub mod pvs;
+mod read;
 pub mod settings;
+pub mod track;
+pub mod world;
 pub mod zip;
 
 #[cfg(test)]
@@ -68,6 +84,18 @@ pub enum Error {
     /// The bytes are not a PGZP archive's directory, a chunk map or a contents list, or an entry does not decode.
     #[error("minizip: {0}")]
     MiniZip(String),
+    /// The bytes are not a `.pgeo` placement file this crate reads.
+    #[error("pgeo: {0}")]
+    Pgeo(String),
+    /// The bytes are not a `.plib` template library this crate reads.
+    #[error("plib: {0}")]
+    Plib(String),
+    /// The bytes are not a `.pvs` instance file this crate reads.
+    #[error("pvs: {0}")]
+    Pvs(String),
+    /// A track's chunk maps and contents lists do not index its entries as this crate reads them.
+    #[error("track: {0}")]
+    Track(String),
     /// The bytes are not a zip archive this crate reads, or an entry does not decode.
     #[error("zip: {0}")]
     Zip(String),
