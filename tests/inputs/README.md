@@ -29,7 +29,7 @@ fails when they differ); [the README](../../README.md#running-the-tests) says ho
 | --- | --- | --- | --- | --- |
 | `installs.fh6/media/Tracks/Brio` | live | yes | the Tokyo track's folder (Steam build 25588841): `GeoChunk0.minizip` to `GeoChunk3.minizip` (39.7, 3.6, 49.4 and 4.8 GB; 411,013, 3,065, 79,840 and 1,476 entries), each with its `ChunkMapN.dat` and `ChunkContentsMiniZipN.txt`; tests/minizip.rs | the user's own install |
 | `oracles.forzatools.fh6/minizip` | live | yes | ForzaTools' reading of installs.fh6/media/Tracks/Brio's four GeoChunks: `chunks.tsv`, `GeoChunkN.indices.tsv`, `GeoChunkN.entries.tsv` (495,394 rows) and `samples.tsv` (200 entries of each method of each chunk, 1,800 rows); tests/minizip.rs | independent: ForzaTools 269a822's `MiniZip`, with K4os.Compression.LZ4 1.3.8 for method 31, through a dump harness kept with the private oracle tools |
-| `installs.fh6/media/Stripped/gamedbRC.slt` | unheld: Forza Horizon 6 is not installed on any machine that runs these tests yet | - | the game database: a large-block container, read by tests/real_data.rs to an SQLite image | the user's own install |
-| `installs.fh6/media/NerdData/NerdData.json` | unheld: Forza Horizon 6 is not installed on any machine that runs these tests yet | - | a one-block small container, read by tests/real_data.rs with every MAC checked | the user's own install |
+| `installs.fh6/media/Stripped/gamedbRC.slt` | live | yes | the game database (Steam build 25588841, 16,123,860 bytes): a large-block container, read by tests/real_data.rs to an SQLite image of 207 tables, every table read whole and every car's stock wheels read | the user's own install |
+| `installs.fh6/media/NerdData/NerdData.json` | live | yes | a one-block small container, read by tests/real_data.rs with every MAC checked | the user's own install |
 
 <!-- end of real-data inputs -->

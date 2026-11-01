@@ -18,6 +18,7 @@ primase-testdata.workspace = true
 [dependencies]
 primase-foundations.workspace = true
 thiserror.workspace = true
+quick-xml.workspace = true
 aes.workspace = true
 cmac.workspace = true
 hkdf.workspace = true
@@ -38,8 +39,9 @@ repository = "https://github.com/Kalmarv/forzatech-formats"
 publish = true
 
 [workspace.dependencies]
-primase-foundations = { version = "0.3.0", features = ["compress"], git = "https://github.com/Kalmarv/primase-foundations", rev = "f9cf4ece1de77fce9d703c63347dd70b728b7c0e" }
-primase-testdata = { version = "0.1.7", git = "https://github.com/Kalmarv/primase-testdata", rev = "de64f982676c01dd133893d53ab5ed557d954ad6" }
+primase-foundations = { version = "0.3.1", features = ["compress", "sqlite"] }
+quick-xml = { version = "=0.42.0", default-features = false }
+primase-testdata = { version = "0.1.7", git = "https://github.com/Kalmarv/primase-testdata", rev = "bbecbd85af61bd946f6e8c956627791e616b6fe4" }
 thiserror = { version = "=2.0.21", default-features = false, features = ["std"] }
 aes = { version = "=0.9.3", default-features = false }
 cmac = { version = "=0.8.0", default-features = false }

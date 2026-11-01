@@ -300,6 +300,7 @@ dependencies = [
  "hkdf",
  "primase-foundations",
  "primase-testdata",
+ "quick-xml",
  "sha2",
  "thiserror",
 ]
@@ -569,14 +570,16 @@ checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
 
 [[package]]
 name = "primase-foundations"
-version = "0.3.0"
-source = "git+https://github.com/Kalmarv/primase-foundations?rev=f9cf4ece1de77fce9d703c63347dd70b728b7c0e#f9cf4ece1de77fce9d703c63347dd70b728b7c0e"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c8ce10679d3b7293ed544edd2db56485a7b458574d3c95084d97d27e9d7e9200"
 dependencies = [
  "flate2",
  "half",
  "libloading",
  "lz4_flex",
  "oozextract",
+ "quantydb-sqlite",
  "ruzstd",
  "thiserror",
  "zlib-rs",
@@ -585,7 +588,7 @@ dependencies = [
 [[package]]
 name = "primase-testdata"
 version = "0.1.7"
-source = "git+https://github.com/Kalmarv/primase-testdata?rev=de64f982676c01dd133893d53ab5ed557d954ad6#de64f982676c01dd133893d53ab5ed557d954ad6"
+source = "git+https://github.com/Kalmarv/primase-testdata?rev=bbecbd85af61bd946f6e8c956627791e616b6fe4#bbecbd85af61bd946f6e8c956627791e616b6fe4"
 dependencies = [
  "blake3",
  "serde_json",
@@ -600,6 +603,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9"
 dependencies = [
  "unicode-ident",
+]
+
+[[package]]
+name = "quantydb-sqlite"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dec6e3654d7f007e8860e4c1b19c16d784a4912b8a512d315fc905fa4341acd7"
+
+[[package]]
+name = "quick-xml"
+version = "0.42.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41b1177fdf999d2321d3fb46ff47159d9c1fb9ad66a4879f8c50a0b504615e9b"
+dependencies = [
+ "memchr",
 ]
 
 [[package]]

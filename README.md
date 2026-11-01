@@ -9,7 +9,9 @@ It reads, from bytes or a reader you give it:
   its 36-byte header, its 0x200- or 0x20000-byte blocks and their MACs, decryption, and the check of every MAC.
 - **The keys** it is decrypted with, from a short text file you keep (`keys::Keys::parse`). **No key ships with this
   crate**, and none is published here.
-- **The game database's second layer**: the keystream that turns the decrypted `gamedbRC.slt` into an SQLite image.
+- **The game database's second layer**: the keystream that turns the decrypted `gamedbRC.slt` into an SQLite image,
+  which `primase_foundations::sqlite` reads, and each car's stock tyre and rim sizes and stock wheel read from it
+  (`gamedb::car_wheels`).
 - **The streaming archives** a track's world is stored in (`GeoChunkN.minizip`, PGZP): the header, the folder index,
   every entry's position, sizes, compression and folder, each entry decoded (stored, raw DEFLATE or raw LZ4, through
   [primase-foundations](https://github.com/Kalmarv/primase-foundations)), and the two files beside each archive that
@@ -20,6 +22,9 @@ It reads, from bytes or a reader you give it:
   DEFLATE entries decoded, and the encrypted entries (method 22: a small-block container around raw DEFLATE)
   decrypted with your keys, every MAC checked. Every decode must give the entry's size and the CRC-32 its archive
   stores.
+- **The settings files** those encrypted entries hold whose root is `DatabaseFile` (`Rendering.zip`'s
+  `Megatexture.xml`, `Livery.xml`, `DecalManager.xml` and the rest): their `Data` and `Settings` blocks, properties,
+  lists and maps, every value kept as the text the file stores (`settings::DatabaseFile::parse`).
 
 More of the engine's formats (its models, materials, textures and placements) will follow. Used by
 [primase](https://github.com/Kalmarv/primase), a game-asset conversion library.
@@ -88,8 +93,15 @@ Your program reads the file and passes its text to `Keys::parse`; the crate itse
   entries, K4os.Compression.LZ4 for LZ4 ones). `tests/minizip.rs` repeats this on your install.
 - **The zip archives** read on one install (Steam build 25588841): all 9,076 zips under `media` (402,283 entries:
   371,516 DEFLATE, 29,250 encrypted, 1,517 stored; one archive with ZIP64 records) pass every check the reader makes.
-  Every encrypted entry decrypts with the `General` usage, its MACs matching and its inflated bytes matching its
-  size and CRC-32. `tests/zip.rs` repeats this on your install.
+  Every entry decodes to its size and CRC-32, and every encrypted entry decrypts with the `General` usage, its MACs
+  matching. `tests/zip.rs` repeats this on your install (a sample of the unencrypted entries, or every entry with
+  `[run] gate = 'full'`).
+- **The game database** decrypts to an SQLite image whose 207 tables (141,832 rows) all read whole with the strict
+  reader. The tyre and rim columns of `Data_Car` (682 cars) give the sizes manufacturers publish for the cars checked
+  (a 2023 Porsche 911 GT3 RS: 275/35 R20 front, 335/30 R21 rear). `tests/real_data.rs` repeats this.
+- **The settings files**: the install's zips hold 72 `DatabaseFile` files (in `Rendering.zip` and
+  `GameTunableSettings.zip`); 71 read, and `Rendering.zip`'s `Cubemap.xml` is refused because its last `Settings`
+  block is closed by `</property>`, which is not well-formed XML. `tests/settings.rs` repeats this.
 
 ## What it does not do
 
@@ -103,7 +115,7 @@ cargo test --workspace
 ```
 
 runs the tests that need no game file. The tests that read a real install (`tests/real_data.rs`, `tests/minizip.rs`,
-`tests/zip.rs`) skip with a line
+`tests/zip.rs`, `tests/settings.rs`) skip with a line
 naming what they need when `GAME_DATA` is not set. To run them, point the `GAME_DATA` environment variable at a TOML
 file naming your own copy and your keys file, in the layout of
 [primase-testdata](https://github.com/Kalmarv/primase-testdata):

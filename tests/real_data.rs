@@ -3,7 +3,7 @@
 //! file or key is kept in this repository.
 //!
 //! - The game database decrypts and descrambles to an SQLite image whose header's page size times page count fits
-//!   the decrypted length.
+//!   the decrypted length; every table reads whole, and every car's stock tyre and rim sizes read.
 //! - `NerdData.json`'s header is authenticated by one of the keys' usages, and every block's MAC matches.
 #![allow(
     clippy::unwrap_used,
@@ -16,6 +16,7 @@ use forzatech_formats::container::{BlockSize, Container};
 use forzatech_formats::gamedb;
 use forzatech_formats::keys::Keys;
 use inputs::{Game, install_file, keys};
+use primase_foundations::sqlite::Database;
 
 fn read_keys() -> Option<Keys> {
     let path = keys(Game::Fh6)?;
@@ -67,6 +68,30 @@ fn game_database_decodes_to_sqlite() {
         page_size * pages <= image.len(),
         "{pages} pages of {page_size} fit {} bytes",
         image.len()
+    );
+
+    // every table reads whole with the strict reader, then each car's stock wheels
+    let db = Database::open(&image[..page_size * pages]).unwrap();
+    let mut rows = 0;
+    for t in db.tables() {
+        rows += db
+            .table(&t.name)
+            .unwrap_or_else(|e| panic!("{}: {e}", t.name))
+            .rows
+            .len();
+    }
+    let cars = gamedb::car_wheels(&db).unwrap();
+    assert_eq!(cars.len(), db.table("Data_Car").unwrap().rows.len());
+    let sizes: std::collections::BTreeSet<_> = cars
+        .iter()
+        .flat_map(|c| [c.front, c.rear])
+        .map(|a| (a.tire_width_mm, a.tire_aspect, a.rim_diameter_in))
+        .collect();
+    println!(
+        "{} tables, {rows} rows; {} cars, {} distinct stock tyre sizes",
+        db.tables().len(),
+        cars.len(),
+        sizes.len()
     );
 }
 

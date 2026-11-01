@@ -14,8 +14,8 @@
 //! central record's.
 //!
 //! What has been checked, and how: on one install of Steam build 25588841, all 9,076 zips (402,283 entries, one archive
-//! with ZIP64 records) read with every check [`Zip::read`] makes holding. `tests/zip.rs` repeats that and decodes
-//! entries, the encrypted ones when you have the keys.
+//! with ZIP64 records) read with every check [`Zip::read`] makes holding, and every entry decodes to its size and
+//! CRC-32, the 29,250 encrypted ones with the `General` usage's keys. `tests/zip.rs` repeats that.
 #![allow(
     clippy::disallowed_methods,
     clippy::disallowed_types,
@@ -121,7 +121,8 @@ pub struct Zip {
 impl Zip {
     /// The archive in `r`: its end records, central directory and every entry's local header read and checked, no
     /// entry's bytes. Refused: no end record in the last 22 bytes (the archives carry no comment), a multi-disk
-    /// archive, a central directory that does not end where the end records start, a record of another signature or
+    /// archive, general purpose flags other than 0, a central directory that does not end where the end records start, a
+    /// record of another signature or
     /// cut short, ZIP64 values a field defers to but no ZIP64 field gives, a name that is not ASCII or is repeated, a
     /// local header that disagrees with its central record (flags, method, CRC-32, sizes, name), entries that overlap
     /// or leave a gap, or data that does not end where the central directory starts.
@@ -368,6 +369,12 @@ fn central_record(c: &mut Cursor<'_>, k: u64) -> Result<Entry> {
     let made = c.u16(LE).map_err(rec)?;
     let needed = c.u16(LE).map_err(rec)?;
     let flags = c.u16(LE).map_err(rec)?;
+    if flags != 0 {
+        // bit 0 (encrypted), bit 3 (a data descriptor after the data) and the rest change the layout this reads
+        return Err(fail(format!(
+            "central record {k}: general purpose flags {flags:#06x}"
+        )));
+    }
     let method = Method::from_number(c.u16(LE).map_err(rec)?);
     let _time_date = (c.u16(LE).map_err(rec)?, c.u16(LE).map_err(rec)?);
     let crc = c.u32(LE).map_err(rec)?;
@@ -704,6 +711,11 @@ mod tests {
         // the local header's CRC-32 of the first entry
         assert!(read(&edit(14, &[1, 2, 3, 4])).is_err(), "local header disagrees");
         assert!(read(&edit(0, b"PK\x03\x05")).is_err(), "local signature");
+        // a data descriptor flag on the first entry, in its local header and its central record alike
+        let cd = u32::from_le_bytes(good[end + 16..end + 20].try_into().unwrap()) as usize;
+        let mut flagged = edit(6, &8u16.to_le_bytes());
+        flagged[cd + 8..cd + 10].copy_from_slice(&8u16.to_le_bytes());
+        assert!(matches!(read(&flagged), Err(Error::Zip(m)) if m.contains("flags 0x0008")));
         let mut dup = sample();
         dup[1].0 = "a/stored.txt";
         assert!(read(&archive(&dup, false)).is_err(), "a repeated name");

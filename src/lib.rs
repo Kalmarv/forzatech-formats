@@ -7,9 +7,11 @@
 //!   36-byte header, its blocks and their MACs, and decryption with keys you supply.
 //! - [`keys`]: those keys, parsed from a small text file you keep. No key ships with this crate.
 //! - [`gamedb`]: the second layer of the game database (`gamedbRC.slt`), a keystream that turns the decrypted
-//!   container into an SQLite image.
+//!   container into an SQLite image, and each car's stock tyre and rim sizes read from it.
 //! - [`minizip`]: the PGZP streaming archives a track's world is stored in (`GeoChunkN.minizip`), their entries
 //!   decoded, and the chunk map and contents list beside each that type and name the entries.
+//! - [`settings`]: the `DatabaseFile` settings XML of the encrypted render and game settings entries, read as
+//!   stored.
 //! - [`zip`]: the zip archives the settings, cars, shaders and libraries are kept in, their entries decoded and, with
 //!   keys you supply, their encrypted (method 22) entries decrypted.
 //!
@@ -37,6 +39,7 @@ pub mod container;
 pub mod gamedb;
 pub mod keys;
 pub mod minizip;
+pub mod settings;
 pub mod zip;
 
 #[cfg(test)]
@@ -62,6 +65,12 @@ pub enum Error {
     /// The bytes are not a zip archive this crate reads, or an entry does not decode.
     #[error("zip: {0}")]
     Zip(String),
+    /// The game database lacks a table or column a reader needs, or holds a value it does not read.
+    #[error("game database: {0}")]
+    GameDb(String),
+    /// The bytes are not a `DatabaseFile` settings file this crate reads.
+    #[error("settings: {0}")]
+    Settings(String),
     /// Reading from the reader the caller gave failed.
     #[error("I/O: {0}")]
     Io(String),
