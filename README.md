@@ -46,9 +46,18 @@ It reads, from bytes or a reader you give it:
   vertex, morph and skinning buffers and the morph target names, every reference between them checked
   (`modelbin::Model::parse`), and one mesh's indices and vertices decoded as stored, with no axis, unit or level of
   detail chosen (`Model::mesh_data`). A material instance is returned as the bundle it is, for a materials reader.
+- **The swatch textures** (`.pb` in a track's GeoChunks, `.swatchbin` in zips): the PC header (dimensions, depth,
+  slice and mip counts, the encoding and DXGI format of each slice, the colour profile) and the byte range of every mip of
+  every slice in the payload, or the Durango (Xbox One) header, and the payload as stored (`texture::Texture`). Pixels are
+  not decoded.
+- **The materials** (`.materialbin`, and the material instances nested in models): the shader and technique a material
+  names, its user data and its shader parameters (hash, flag hash, type, GUID and value, a texture parameter's path and
+  path hash, a sampler's four words as stored) (`material::Material`, `material::Instance`), and the parameter tables of
+  the shader families (`.shaderbin`) they resolve through (`shader::Shader`: the parameter names, the constant, texture
+  and sampler maps, the constants' size and the default values).
 
-More of the engine's formats (the contents of its materials and textures, and the rest of a track's placements)
-will follow. Used by [primase](https://github.com/Kalmarv/primase), a game-asset conversion library.
+More of the engine's formats (the rest of a track's placements) will follow. Used by
+[primase](https://github.com/Kalmarv/primase), a game-asset conversion library.
 
 ## Example
 
@@ -160,6 +169,19 @@ Your program reads the file and passes its text to `Keys::parse`; the crate itse
   Each gives the same blobs, metadata records and payloads as Doliman100's ForzaTech-extraction-tools reads (whose
   reader sees the first 0xFFF bytes of the 16 payloads whose size is escaped). `tests/bundle.rs` repeats this on your
   install (a sample, or every bundle with `[run] gate = 'full'`).
+- **The swatch textures** read on one install (Steam build 25588841): all 318,129 (169,351 `.pb` in the Tokyo track's
+  GeoChunks, 22,251 `.pb` and 126,527 `.swatchbin` in zips; 318,118 PC and 11 Durango) read with no refusals and no
+  header byte unaccounted for, and every mip of every slice (1,309,343 in all) lies where the header says, the mips
+  filling the payload exactly. Every PC header equals what Nenkai's ForzaTools reads (and its Durango header the 11
+  Durango ones), 25,057 mips equal ForzaTools.TexConv's DDS as BCnEncoder.Net reads it (every 50th texture), and
+  311,455 textures equal Doliman100's library (which has no Durango reading, and does not know the encoding of 9,943).
+  `tests/texture.rs` repeats this on your install.
+- **The materials and shaders** read on one install: all 9,707 `.materialbin`, 987 `.shaderbin` and the 1,524,285
+  material instances in 196,620 models (6,539 empty `MatI` blobs besides) read with no refusals, 18,367,250 parameters
+  in all. The hash after each of 569,170 texture paths is the CRC-32 of the lowercased path, and in every shaderbin the
+  `CBMP`, `TXMP` and `SPMP` hashes are `PARM` hashes. 206,621 readings (a material, a shader or a model's instances) equal
+  those of Doliman100's library, which reads a sampler as 12 bytes and has no type 12, so its list stops after the first
+  of either. `tests/material.rs` repeats this on your install.
 
 - **The models** read on one install (Steam build 25588841): all 113,868 `.modelbin` of the Tokyo track's `GeoChunk0`
   (407,461 meshes) and all 82,752 under `media` in zips (1,339,215 meshes) read with no refusals, and every mesh's
@@ -187,7 +209,7 @@ cargo test --workspace
 
 runs the tests that need no game file. The tests that read a real install (`tests/real_data.rs`, `tests/minizip.rs`,
 `tests/zip.rs`, `tests/settings.rs`, `tests/bundle.rs`, `tests/pgeo.rs`, `tests/plib.rs`, `tests/pvs.rs`, `tests/particles.rs`,
-`tests/gameobjs.rs`, `tests/asset_manifest.rs`) skip with a line
+`tests/gameobjs.rs`, `tests/asset_manifest.rs`, `tests/texture.rs`, `tests/material.rs`) skip with a line
 naming what they need when `GAME_DATA` is not set. To run them, point the `GAME_DATA` environment variable at a TOML
 file naming your own copy and your keys file, in the layout of
 [primase-testdata](https://github.com/Kalmarv/primase-testdata):

@@ -19,6 +19,12 @@
   slot with no instance), every field accounted for and every reference between blobs checked; and one mesh's indices
   and vertices decoded as stored (positions, normals, tangents, texture coordinates, colours, morph deltas and
   skinning weights) without choosing a level of detail, an axis or a unit.
+- `texture`: the swatch textures (`.pb`, `.swatchbin`): the PC header (dimensions, depth, slice and mip counts, flags,
+  the encoding of each slice and its DXGI format, the colour profile) and every mip's byte range, or the Durango
+  header, with the payload as stored; no pixel is decoded.
+- `material`: the parent materials (`.materialbin`) and the material instances nested in models, with their shader
+  parameters (versions 3.1, 3.3 and 3.4, every type) and `path_hash`, the CRC-32 of a texture's lowercased game path.
+- `shader`: the parameter tables of a `.shaderbin` (`PARM`, `CBMP`, `TXMP`, `SPMP`, `CBEX` and the `DFPR` defaults).
 - `gamedb::car_wheels`: each car's stock tyre width, aspect ratio and rim diameter, front and rear, and its stock
   wheel, from the decrypted database (read through primase-foundations' `sqlite`).
 - `pgeo`: the per-cell placement files (`.pgeo`): header (kind, bounding box, category, route, gameplay tag, season

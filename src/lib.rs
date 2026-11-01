@@ -14,6 +14,8 @@
 //! - [`keys`]: those keys, parsed from a small text file you keep. No key ships with this crate.
 //! - [`gamedb`]: the second layer of the game database (`gamedbRC.slt`), a keystream that turns the decrypted
 //!   container into an SQLite image, and each car's stock tyre and rim sizes read from it.
+//! - [`material`]: the parent materials (`.materialbin`) and the material instances nested in models, with their
+//!   shader parameters, as stored.
 //! - [`modelbin`]: models (`.modelbin`): their header, skeleton, material instances (as bundles), meshes, vertex
 //!   layouts and buffers, as stored, and one mesh's indices and vertices decoded.
 //! - [`minizip`]: the PGZP streaming archives a track's world is stored in (`GeoChunkN.minizip`), their entries
@@ -28,6 +30,9 @@
 //!   rows, models, textures and clips.
 //! - [`settings`]: the `DatabaseFile` settings XML of the encrypted render and game settings entries, read as
 //!   stored.
+//! - [`shader`]: the parameter tables of the shader families (`.shaderbin`) that a material's parameters resolve
+//!   through.
+//! - [`texture`]: the swatch textures (`.pb`, `.swatchbin`): the header, and where each mip lies in the payload.
 //! - [`track`]: the index of a track's GeoChunk entries by chunk map reference and by model path, which the placement
 //!   files' model references resolve through.
 //! - [`world`]: the world frame the placement files share: fixed-point positions, half floats, x/z boxes, the cell
@@ -61,6 +66,7 @@ pub mod container;
 pub mod gamedb;
 pub mod gameobjs;
 pub mod keys;
+pub mod material;
 pub mod minizip;
 pub mod modelbin;
 pub mod particles;
@@ -69,10 +75,15 @@ pub mod plib;
 pub mod pvs;
 mod read;
 pub mod settings;
+pub mod shader;
+pub mod texture;
 pub mod track;
 pub mod world;
 mod xml;
 pub mod zip;
+
+#[cfg(test)]
+mod test_bundle;
 
 #[cfg(test)]
 #[path = "../tests/inputs/mod.rs"]
@@ -97,6 +108,15 @@ pub enum Error {
     /// The bytes are not a model this crate reads, or a mesh does not decode.
     #[error("modelbin: {0}")]
     ModelBin(String),
+    /// The bytes are not a material, a material instance or a parameter list this crate reads.
+    #[error("material: {0}")]
+    Material(String),
+    /// The bytes are not a shaderbin whose parameter tables this crate reads.
+    #[error("shader: {0}")]
+    Shader(String),
+    /// The bytes are not a texture this crate reads.
+    #[error("texture: {0}")]
+    Texture(String),
     /// The bytes are not a PGZP archive's directory, a chunk map or a contents list, or an entry does not decode.
     #[error("minizip: {0}")]
     MiniZip(String),

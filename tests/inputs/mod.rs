@@ -27,12 +27,12 @@ primase_testdata::inputs! {
     tools {}
     oracle_sets {
         ForzaTools = "forzatools" {
-            about: "Nenkai ForzaTools' readings of the game's files: for `minizip`, per GeoChunk the header fields, the folder index and every entry (offset, sizes, method, padding, folder field, chunk-map record, name) as TSV, and the SHA-256 of sampled entries' contents; for `modelbin`, the blobs and metadata of every Tokyo model as that library's classes hold them (the model header, the leading fields of each mesh, vertex layouts, buffer headers with the SHA-256 of their elements, skeletons, material instances), as TSV",
-            source: "independent: Nenkai/ForzaTools 269a822 (MIT, `ForzaTools.PlaygroundMiniZip`, opened read-only and built for .NET 8), with K4os.Compression.LZ4 1.3.8 decoding the method-31 entries it locates, through a small dump harness that is not part of this repository; for `modelbin` the library's bundle classes with the one change that a tag it has no class for is kept as its raw bytes instead of ending the load (the harness lists those)",
+            about: "Nenkai ForzaTools' readings of the game's files: for `minizip`, per GeoChunk the header fields, the folder index and every entry (offset, sizes, method, padding, folder field, chunk-map record, name) as TSV, and the SHA-256 of sampled entries' contents; for `modelbin`, the blobs and metadata of every Tokyo model as that library's classes hold them (the model header, the leading fields of each mesh, vertex layouts, buffer headers with the SHA-256 of their elements, skeletons, material instances), as TSV; for `texture`, every texture's header fields and, of a sample, the mips of the DDS its TexConv writes",
+            source: "independent: Nenkai/ForzaTools 269a822 (MIT, `ForzaTools.PlaygroundMiniZip`, opened read-only and built for .NET 8), with K4os.Compression.LZ4 1.3.8 decoding the method-31 entries it locates, through a small dump harness that is not part of this repository; for `modelbin` the library's bundle classes with the one change that a tag it has no class for is kept as its raw bytes instead of ending the load (the harness lists those); for `texture` the library's `PCTextureContentHeader`, `DurangoTextureContentHeader` and `ForzaTools.TexConv`, with BCnEncoder.Net 2.1.0 reading the DDS back",
         },
         Doliman = "doliman" {
-            about: "Doliman100 ForzaTech-extraction-tools' readings of the game's files: for `bundle`, every Grub bundle's blobs and metadata as that library's bundle classes read them, one SHA-256 per bundle and every 100th bundle in full, as TSV; for `modelbin`, what the importer script computes for every Tokyo model (the fields it reads of each mesh, and the faces, positions, normals, texture coordinates and colours it builds, as it builds them) as TSV, with every vertex of every 500th model",
-            source: "independent: Doliman100/ForzaTech-extraction-tools d126767 (GPL-3.0, the `Bundle`, `Blob` and `Metadata` classes of `scripts/modelbin_importer.py`, unchanged), through a small dump harness that is not part of this repository; the bundles' bytes come from this crate's archive readers, checked by tests/minizip.rs and tests/zip.rs; for `modelbin` the importer's own per-model code, run unchanged with a recording stand-in for Blender",
+            about: "Doliman100 ForzaTech-extraction-tools' readings of the game's files: for `bundle`, every Grub bundle's blobs and metadata as that library's bundle classes read them, one SHA-256 per bundle and every 100th bundle in full, as TSV; for `modelbin`, what the importer script computes for every Tokyo model (the fields it reads of each mesh, and the faces, positions, normals, texture coordinates and colours it builds, as it builds them) as TSV, with every vertex of every 500th model; for `texmat`, every texture as its `Texture` class reads it and every material parameter list as its `ShaderParameter` class reads it",
+            source: "independent: Doliman100/ForzaTech-extraction-tools d126767 (GPL-3.0, the `Bundle`, `Blob`, `Metadata`, `Texture` and `ShaderParameter` classes of `scripts/modelbin_importer.py`, unchanged), through a small dump harness that is not part of this repository; the bundles' bytes come from this crate's archive readers, checked by tests/minizip.rs and tests/zip.rs; for `modelbin` the importer's own per-model code, run unchanged with a recording stand-in for Blender",
         },
     }
     declared {
@@ -65,6 +65,18 @@ primase_testdata::inputs! {
             gate: true,
             about: r#"Doliman100's reading of the 113,868 models of installs.fh6/media/Tracks/Brio's GeoChunk0: `models.tsv`, `meshes.tsv` (the fields its `Mesh` reads and the faces, positions, normals, texture coordinates and colours the importer builds, as statistics and a faces hash), `sample.tsv` (every vertex of every 500th model) and `errors.tsv`; tests/modelbin.rs"#,
             source: r#"independent: ForzaTech-extraction-tools d126767's `modelbin_importer.py`, run per model by a dump harness kept with the private oracle tools"#,
+        },
+        Query::Oracle(OracleSet::ForzaTools, Game::Fh6, "texture") => {
+            status: Live,
+            gate: true,
+            about: r#"ForzaTools' reading of every texture of installs.fh6 (the `.pb` entries of the Tokyo track's GeoChunks and the `.swatchbin` entries of every zip under `media`): `pc.tsv` (the `PCTextureContentHeader` fields, the format `DetermineFormat` gives and the payload's size), `durango.tsv` (the `DurangoTextureContentHeader` fields), `dds.tsv` (of every 50th PC texture, each mip of the DDS TexConv's `ToDds` writes, read by BCnEncoder.Net: size and SHA-256) and `errors.tsv`; tests/texture.rs"#,
+            source: r#"independent: ForzaTools 269a822's `PCTextureContentHeader`, `DurangoTextureContentHeader` and `ForzaTools.TexConv`, with BCnEncoder.Net 2.1.0, through a dump harness kept with the private oracle tools"#,
+        },
+        Query::Oracle(OracleSet::Doliman, Game::Fh6, "texmat") => {
+            status: Live,
+            gate: true,
+            about: r#"Doliman100's reading of the textures and materials of installs.fh6: `textures.tsv` (every `.pb` and `.swatchbin`: GUID, dimensions, mip count, linear size, DXGI format, payload size and SHA-256), `materials.tsv` (every `.materialbin`, `.shaderbin` and every nested `MatI` of a `.modelbin`: the objects and parameters read and the SHA-256 of the reading), `sample.tsv` (every 100th entry's reading line by line) and `errors.tsv`; tests/texture.rs and tests/material.rs"#,
+            source: r#"independent: ForzaTech-extraction-tools d126767's `Texture` and `ShaderParameter` classes, through a dump harness kept with the private oracle tools"#,
         },
         Query::Install(Game::Fh6, Some("media/Stripped/gamedbRC.slt")) => {
             status: Live,
