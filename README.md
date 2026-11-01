@@ -37,6 +37,10 @@ It reads, from bytes or a reader you give it:
   and `Pgeo::instances_in` and `pvs::World::instances_in` give the placements in one x/z box. Every season's variant is
   read; which one to draw is the caller's choice. `particles::Particles` reads the particle effects a track and its
   routes place (`.particlebin`), and `gameobjs::GameObjs` the named places gameplay refers to (`GameObjs.xml`).
+- **The asset manifests** (`AssetManifest.xml`, `asset_manifest::AssetManifest`): in each `bin.zip`, which entry holds
+  each shader and material, by the source path it was built from, so the game path a model's material instance names
+  its parent by resolves to an entry; beside a track, its textures (by the path hash materials name them by) and its
+  models with the LOD rows of the instance file that use them.
 
 More of the engine's formats (the contents of its models, materials and textures, and the rest of a track's placements)
 will follow. Used by [primase](https://github.com/Kalmarv/primase), a game-asset conversion library.
@@ -137,6 +141,14 @@ Your program reads the file and passes its text to `Keys::parse`; the crate itse
   (`tests/particles.rs`). **Game objects:** the track's 793, the open world's 59 and the home space's none read whole
   (`tests/gameobjs.rs`).
 
+- **The asset manifests**: no third-party reader of them exists, so the check is a census of the four in one install
+  (Steam build 25588841: the three `bin.zip` manifests and the Tokyo track's loose one), each read whole and checked
+  against what it describes (`tests/asset_manifest.rs`). Every shader and material name is an entry of its zip and
+  every material and shader entry is named; every texture's `SourceHash` is the CRC-32 of its game path (48,733 and
+  6); the loose manifest's 134,330 models are the instance file's model numbers, each once, and its 593,706 instances
+  its LOD rows, each once and each of its model; the instance file's 46 shader and 419 material paths each name an
+  entry of the track's `bin.zip` manifest.
+
 - **The Grub bundles** read on one install (Steam build 25588841): all 526,129 bundles of the Tokyo track's GeoChunks
   and the zips under `media` (196,620 models, 191,602 `.pb` and 126,527 `.swatchbin` textures, 9,707 materials, 987
   shaders, 682 car colour lists and 4 crowds), and the 1,526,529 bundles nested in their blobs, read with no refusals.
@@ -160,7 +172,7 @@ cargo test --workspace
 
 runs the tests that need no game file. The tests that read a real install (`tests/real_data.rs`, `tests/minizip.rs`,
 `tests/zip.rs`, `tests/settings.rs`, `tests/bundle.rs`, `tests/pgeo.rs`, `tests/plib.rs`, `tests/pvs.rs`, `tests/particles.rs`,
-`tests/gameobjs.rs`) skip with a line
+`tests/gameobjs.rs`, `tests/asset_manifest.rs`) skip with a line
 naming what they need when `GAME_DATA` is not set. To run them, point the `GAME_DATA` environment variable at a TOML
 file naming your own copy and your keys file, in the layout of
 [primase-testdata](https://github.com/Kalmarv/primase-testdata):

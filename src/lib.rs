@@ -2,6 +2,9 @@
 //!
 //! This crate reads, from bytes or a reader you give it (it opens no file itself):
 //!
+//! - [`asset_manifest`]: the asset manifests (`AssetManifest.xml`): which entry of a `bin.zip` holds each shader and
+//!   material, by the source path it was built from, and a track's textures and models with the instances that use
+//!   them.
 //! - [`bundle`]: the Grub bundles models, textures, materials and shaders are stored in: their blobs, metadata
 //!   records and data, as stored.
 //! - [`container`]: the encrypted container (the Arxan TransformIT envelope) that wraps Forza Horizon 6's game
@@ -50,6 +53,7 @@
 #![deny(clippy::disallowed_methods, clippy::disallowed_types)]
 #![deny(missing_docs)]
 
+pub mod asset_manifest;
 pub mod bundle;
 pub mod container;
 pub mod gamedb;
@@ -64,6 +68,7 @@ mod read;
 pub mod settings;
 pub mod track;
 pub mod world;
+mod xml;
 pub mod zip;
 
 #[cfg(test)]
@@ -92,6 +97,9 @@ pub enum Error {
     /// The bytes are not a `.pgeo` placement file this crate reads.
     #[error("pgeo: {0}")]
     Pgeo(String),
+    /// The bytes are not an `AssetManifest.xml` asset manifest this crate reads.
+    #[error("asset manifest: {0}")]
+    AssetManifest(String),
     /// The bytes are not a `GameObjs.xml` game objects file this crate reads.
     #[error("game objects: {0}")]
     GameObjs(String),

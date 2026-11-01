@@ -39,7 +39,7 @@ primase_testdata::inputs! {
         Query::Install(Game::Fh6, Some("media/Tracks/Brio")) => {
             status: Live,
             gate: true,
-            about: r#"the Tokyo track's folder (Steam build 25588841): `GeoChunk0.minizip` to `GeoChunk3.minizip` (39.7, 3.6, 49.4 and 4.8 GB; 411,013, 3,065, 79,840 and 1,476 entries), each with its `ChunkMapN.dat` and `ChunkContentsMiniZipN.txt`; tests/minizip.rs, tests/pgeo.rs, tests/plib.rs, tests/pvs.rs"#,
+            about: r#"the Tokyo track's folder (Steam build 25588841): `GeoChunk0.minizip` to `GeoChunk3.minizip` (39.7, 3.6, 49.4 and 4.8 GB; 411,013, 3,065, 79,840 and 1,476 entries), each with its `ChunkMapN.dat` and `ChunkContentsMiniZipN.txt`, `bin.zip` (27,544 entries) and the loose `AssetManifest.xml`; tests/minizip.rs, tests/pgeo.rs, tests/plib.rs, tests/pvs.rs, tests/asset_manifest.rs"#,
             source: r#"the user's own install"#,
         },
         Query::Oracle(OracleSet::ForzaTools, Game::Fh6, "minizip") => {

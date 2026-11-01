@@ -35,3 +35,6 @@
   position, rotation, the strings that gate it, and the chain of links through its slots, every constant, link and
   string offset checked.
 - `gameobjs`: the named places gameplay refers to (`GameObjs.xml`): each object's id, optional guid, position and axes.
+- `asset_manifest`: the asset manifests (`AssetManifest.xml`): shaders and materials by zip entry and source path,
+  with lookups by the game path that names them; textures (source hash, instance-file texture index or build record);
+  models with their mesh and instances. The XML reading `gameobjs` and `asset_manifest` share is one strict parser.
