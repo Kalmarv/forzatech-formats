@@ -1,6 +1,6 @@
 //! Read ForzaTech files, as Forza Horizon 6 ships them.
 //!
-//! This crate reads, from bytes you give it, without file access:
+//! This crate reads, from bytes or a reader you give it (it opens no file itself):
 //!
 //! - [`container`]: the encrypted container (the Arxan TransformIT envelope) that wraps Forza Horizon 6's game
 //!   database, its settings archives' method-22 zip entries, `sfsdata`, `NerdData.json` and the player's profile: the
@@ -8,6 +8,8 @@
 //! - [`keys`]: those keys, parsed from a small text file you keep. No key ships with this crate.
 //! - [`gamedb`]: the second layer of the game database (`gamedbRC.slt`), a keystream that turns the decrypted
 //!   container into an SQLite image.
+//! - [`minizip`]: the PGZP streaming archives a track's world is stored in (`GeoChunkN.minizip`), their entries
+//!   decoded, and the chunk map and contents list beside each that type and name the entries.
 //!
 //! Every read is checked: untrusted bytes give an [`Error`] naming what was expected, never a panic.
 //!
@@ -32,6 +34,7 @@
 pub mod container;
 pub mod gamedb;
 pub mod keys;
+pub mod minizip;
 
 #[cfg(test)]
 #[path = "../tests/inputs/mod.rs"]
@@ -50,6 +53,12 @@ pub enum Error {
         /// The header, or the block at an index.
         what: String,
     },
+    /// The bytes are not a PGZP archive's directory, a chunk map or a contents list, or an entry does not decode.
+    #[error("minizip: {0}")]
+    MiniZip(String),
+    /// Reading from the reader the caller gave failed.
+    #[error("I/O: {0}")]
+    Io(String),
     /// The keys text is malformed: the line (counted from 1) and what is wrong with it.
     #[error("keys, line {line}: {detail}")]
     Keys {

@@ -2,7 +2,7 @@
 
 A Rust library that reads ForzaTech files, as Forza Horizon 6 ships them.
 
-It reads, from bytes you give it:
+It reads, from bytes or a reader you give it:
 
 - **The encrypted container** (the Arxan TransformIT envelope) that wraps Forza Horizon 6's game database
   (`gamedbRC.slt`), the method-22 entries of its settings archives, `sfsdata`, `NerdData.json` and the player's profile:
@@ -10,8 +10,13 @@ It reads, from bytes you give it:
 - **The keys** it is decrypted with, from a short text file you keep (`keys::Keys::parse`). **No key ships with this
   crate**, and none is published here.
 - **The game database's second layer**: the keystream that turns the decrypted `gamedbRC.slt` into an SQLite image.
+- **The streaming archives** a track's world is stored in (`GeoChunkN.minizip`, PGZP): the header, the folder index,
+  every entry's position, sizes, compression and folder, each entry decoded (stored, raw DEFLATE or raw LZ4, through
+  [primase-foundations](https://github.com/Kalmarv/primase-foundations)), and the two files beside each archive that
+  type and name its entries (`ChunkMapN.dat`, `ChunkContentsMiniZipN.txt`). `minizip::MiniZip::read` reads only the
+  directory; an entry is read when you ask for it, so a 40 GB archive costs a few megabytes to open.
 
-More of the engine's formats (its streaming archives, models, materials, textures and placements) will follow. Used by
+More of the engine's formats (its models, materials, textures and placements) will follow. Used by
 [primase](https://github.com/Kalmarv/primase), a game-asset conversion library.
 
 ## Example
@@ -71,10 +76,15 @@ Your program reads the file and passes its text to `Keys::parse`; the crate itse
   the keystream for the game database. `tests/real_data.rs` repeats it on your own install with your keys.
 - For the game database, whether the header's MAC and padding field mean what they mean in small containers is not
   established, so `gamedb::decrypt` does not rely on them.
+- **The streaming archives** read on one install's Tokyo track (Steam build 25588841): all four GeoChunks, 495,394
+  entries, pass every check the reader makes, and every entry decodes to exactly its stated size. Every entry's
+  position, sizes, method, padding, folder and name, and every folder index value, equal what Nenkai's ForzaTools
+  reads from the same files, and 1,800 sampled entries decode to the same bytes (ForzaTools for stored and DEFLATE
+  entries, K4os.Compression.LZ4 for LZ4 ones). `tests/minizip.rs` repeats this on your install.
 
 ## What it does not do
 
-- It does not encrypt or re-encrypt, and it does not write any file.
+- It does not encrypt or re-encrypt, and it does not write any file or write into an archive.
 - It does not ship, find or derive keys.
 - It does not yet read the zip archives the encrypted entries live in, or inflate them.
 

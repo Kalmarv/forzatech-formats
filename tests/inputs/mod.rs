@@ -25,8 +25,25 @@ primase_testdata::inputs! {
         },
     }
     tools {}
-    oracle_sets {}
+    oracle_sets {
+        ForzaTools = "forzatools" {
+            about: "Nenkai ForzaTools' readings of the game's files: for `minizip`, per GeoChunk the header fields, the folder index and every entry (offset, sizes, method, padding, folder field, chunk-map record, name) as TSV, and the SHA-256 of sampled entries' contents",
+            source: "independent: Nenkai/ForzaTools 269a822 (MIT, `ForzaTools.PlaygroundMiniZip`, opened read-only and built for .NET 8), with K4os.Compression.LZ4 1.3.8 decoding the method-31 entries it locates, through a small dump harness that is not part of this repository",
+        },
+    }
     declared {
+        Query::Install(Game::Fh6, Some("media/Tracks/Brio")) => {
+            status: Live,
+            gate: true,
+            about: r#"the Tokyo track's folder (Steam build 25588841): `GeoChunk0.minizip` to `GeoChunk3.minizip` (39.7, 3.6, 49.4 and 4.8 GB; 411,013, 3,065, 79,840 and 1,476 entries), each with its `ChunkMapN.dat` and `ChunkContentsMiniZipN.txt`; tests/minizip.rs"#,
+            source: r#"the user's own install"#,
+        },
+        Query::Oracle(OracleSet::ForzaTools, Game::Fh6, "minizip") => {
+            status: Live,
+            gate: true,
+            about: r#"ForzaTools' reading of installs.fh6/media/Tracks/Brio's four GeoChunks: `chunks.tsv`, `GeoChunkN.indices.tsv`, `GeoChunkN.entries.tsv` (495,394 rows) and `samples.tsv` (200 entries of each method of each chunk, 1,800 rows); tests/minizip.rs"#,
+            source: r#"independent: ForzaTools 269a822's `MiniZip`, with K4os.Compression.LZ4 1.3.8 for method 31, through a dump harness kept with the private oracle tools"#,
+        },
         Query::Install(Game::Fh6, Some("media/Stripped/gamedbRC.slt")) => {
             status: Unheld("Forza Horizon 6 is not installed on any machine that runs these tests yet"),
             gate: false,
