@@ -49,3 +49,6 @@
 - `asset_manifest`: the asset manifests (`AssetManifest.xml`): shaders and materials by zip entry and source path,
   with lookups by the game path that names them; textures (source hash, instance-file texture index or build record);
   models with their mesh and instances. The XML reading `gameobjs` and `asset_manifest` share is one strict parser.
+- `ppr`: the property files (`.ppr`) of `media\TimeOfDay` (versions 2 and 3): the names table, the groups and their typed
+  leaves, curves with their components and keys, each group, leaf and key stride checked, every byte accounted for;
+  `Ppr::group` and `Ppr::leaf` look a `Sky` and its properties up by name and refuse an ambiguous one.

@@ -26,6 +26,8 @@
 //!   scale, its spline-deform curve, its season and variant data, and the template its block names.
 //! - [`plib`]: the template libraries (`.plib`) those blocks name: draw behaviours, model templates with the model paths
 //!   they list, placement templates, and the group libraries of the `Placement` folders.
+//! - [`ppr`]: the property files (`.ppr`) of `media\TimeOfDay`: a table of names and groups of typed leaves and
+//!   curves, the track's sky presets among them.
 //! - [`pvs`]: the hand-placed instance file (`.pvs`): the instances not placed by a rule, with their transforms, LOD
 //!   rows, models, textures and clips.
 //! - [`settings`]: the `DatabaseFile` settings XML of the encrypted render and game settings entries, read as
@@ -72,6 +74,7 @@ pub mod modelbin;
 pub mod particles;
 pub mod pgeo;
 pub mod plib;
+pub mod ppr;
 pub mod pvs;
 mod read;
 pub mod settings;
@@ -135,6 +138,9 @@ pub enum Error {
     /// The bytes are not a `.plib` template library this crate reads.
     #[error("plib: {0}")]
     Plib(String),
+    /// The bytes are not a `.ppr` property file this crate reads.
+    #[error("ppr: {0}")]
+    Ppr(String),
     /// The bytes are not a `.pvs` instance file this crate reads.
     #[error("pvs: {0}")]
     Pvs(String),

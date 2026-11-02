@@ -108,6 +108,12 @@ primase_testdata::inputs! {
             about: r#"the home space's game objects file (Steam build 25588841, 104 bytes): no object; tests/gameobjs.rs"#,
             source: r#"the user's own install"#,
         },
+        Query::Install(Game::Fh6, Some("media/TimeOfDay")) => {
+            status: Live,
+            gate: true,
+            about: r#"the sky presets' folder (Steam build 25588841): `TimeOfDay_Brio.ppr` (1,714,176 bytes, 2,954 names, 2,350 groups, 54,109 leaves), `TimeOfDay.ppr` (1,086,259 bytes, 1,962 names, 1,337 groups, 33,500 leaves) and `Homespace.ppr` (24 bytes, no group), plain files; tests/ppr.rs"#,
+            source: r#"the user's own install"#,
+        },
         Query::Install(Game::Fh6, Some("media/NerdData/NerdData.json")) => {
             status: Live,
             gate: true,

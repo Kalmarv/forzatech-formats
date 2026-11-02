@@ -40,6 +40,7 @@ fails when they differ); [the README](../../README.md#running-the-tests) says ho
 | `installs.fh6/media/Stripped/gs/brio` | live | yes | the open world's folder of gameplay data (Steam build 25588841; 287 files, 241 MB): `gameobjs.xml` (59 game objects) and `routedefinitions` with 168 `.particlebin` files (508 particle instances in all) beside the routes' sound scapes; tests/gameobjs.rs and tests/particles.rs | the user's own install |
 | `installs.fh6/media/Tracks/homespace02/Ribbon_00/ParticleInstances.particlebin` | live | yes | the home space's particle instances file (Steam build 25588841, 60 bytes): a bundle whose list holds no instance; tests/particles.rs | the user's own install |
 | `installs.fh6/media/Tracks/homespace02/Ribbon_00/GameObjs.xml` | live | yes | the home space's game objects file (Steam build 25588841, 104 bytes): no object; tests/gameobjs.rs | the user's own install |
+| `installs.fh6/media/TimeOfDay` | live | yes | the sky presets' folder (Steam build 25588841): `TimeOfDay_Brio.ppr` (1,714,176 bytes, 2,954 names, 2,350 groups, 54,109 leaves), `TimeOfDay.ppr` (1,086,259 bytes, 1,962 names, 1,337 groups, 33,500 leaves) and `Homespace.ppr` (24 bytes, no group), plain files; tests/ppr.rs | the user's own install |
 | `installs.fh6/media/NerdData/NerdData.json` | live | yes | a one-block small container, read by tests/real_data.rs with every MAC checked | the user's own install |
 
 <!-- end of real-data inputs -->
