@@ -1,5 +1,7 @@
 # forzatech-formats
 
+[![crates.io: forzatech-formats](https://img.shields.io/crates/v/forzatech-formats?label=forzatech-formats)](https://crates.io/crates/forzatech-formats) [![docs.rs](https://img.shields.io/docsrs/forzatech-formats)](https://docs.rs/forzatech-formats) [![CI](https://img.shields.io/github/actions/workflow/status/Kalmarv/forzatech-formats/ci.yml?branch=main&label=CI)](https://github.com/Kalmarv/forzatech-formats/actions/workflows/ci.yml)
+
 A Rust library that reads the file formats of Forza Horizon 6, a game on the ForzaTech engine.
 
 ## Features
@@ -29,14 +31,11 @@ A Rust library that reads the file formats of Forza Horizon 6, a game on the For
 
 ### Installation
 
-The crate is not on crates.io yet. Add it as a git dependency:
-
-```toml
-[dependencies]
-forzatech-formats = { git = "https://github.com/Kalmarv/forzatech-formats" }
+```sh
+cargo add forzatech-formats
 ```
 
-It depends on [primase-foundations](https://github.com/Kalmarv/primase-foundations) from crates.io for decompression,
+It depends on [primase-foundations](https://crates.io/crates/primase-foundations) from crates.io for decompression,
 vertex decoding and SQLite.
 
 ### Usage
