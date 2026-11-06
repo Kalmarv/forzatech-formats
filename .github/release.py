@@ -15,8 +15,9 @@ Every step skips what is already done, so a rerun of a failed release finishes i
   release.py build TARGET    build the planned binaries for TARGET into dist/
   release.py publish [--dry-run]   tag, publish and create the Releases (with --dry-run: say what it would do)
 
-Run it from the cargo workspace's folder. Environment: RELEASE_BINS (the binary targets shipped as downloads), PLAN (the plan job's output; computed again when
-unset), GH_TOKEN (gh), CARGO_REGISTRY_TOKEN (cargo publish).
+Run it from the cargo workspace's folder. Environment: RELEASE_BINS (the binary targets shipped as downloads),
+RELEASE_DIST (the archives; dist/), PLAN (the plan job's output; computed again when unset), GH_TOKEN (gh),
+CARGO_REGISTRY_TOKEN (cargo publish).
 """
 
 import hashlib
@@ -36,7 +37,7 @@ import urllib.request
 import zipfile
 
 ROOT = pathlib.Path.cwd()  # the cargo workspace
-DIST = ROOT / "dist"
+DIST = pathlib.Path(os.environ.get("RELEASE_DIST") or ROOT / "dist")  # the binary archives
 LOCKED = ["--locked"] if (ROOT / "Cargo.lock").exists() else []  # a library repository may not commit its lock file
 
 
@@ -85,7 +86,10 @@ def parse_version(v):
 
 
 def version_moved(u, pkgs):
-    """Whether a unit's version moved: it differs from the parent commit's, or is newer than the unit's latest tag."""
+    """Whether a unit's version moved: it differs from the parent commit's, or is newer than the unit's latest tag. A
+    run started by hand (a private repository's release) is the request itself: its version moved if unreleased."""
+    if os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch":
+        return True
     prefix = u["tag"][: -len(u["version"])]
     tagged = [t[len(prefix):] for t in run("git", "tag", "--list", f"{prefix}*").stdout.split()]
     tagged = [v for v in tagged if re.fullmatch(r"\d+\.\d+\.\d+.*", v)]
@@ -107,7 +111,9 @@ def compute_plan():
     meta = json.loads(run("cargo", "metadata", "--no-deps", "--format-version", "1").stdout)
     members = set(meta["workspace_members"])
     pkgs = {p["name"]: p for p in meta["packages"] if p["id"] in members}
-    wanted = set(os.environ.get("RELEASE_BINS", "").split())
+    # RELEASE_BINS: `bin` (every target) or `bin:windows` / `bin:linux` (only targets whose triple names it)
+    only = dict((w.split(":") + [""])[:2] for w in os.environ.get("RELEASE_BINS", "").split())
+    wanted = set(only)
     head = run("git", "rev-parse", "HEAD").stdout.strip()
 
     units = {}
@@ -120,7 +126,7 @@ def compute_plan():
         u = units.setdefault(key, {"package": key, "version": p["version"], "crates": [], "bins": []})
         if publishable:
             u["crates"].append(p["name"])
-        u["bins"] += [{"package": p["name"], "bin": b} for b in bins]
+        u["bins"] += [{"package": p["name"], "bin": b, "only": only[b]} for b in bins]
     missing = wanted - {b["bin"] for u in units.values() for b in u["bins"]}
     if missing:
         sys.exit(f"RELEASE_BINS names binaries no workspace package has: {' '.join(sorted(missing))}")
@@ -208,6 +214,8 @@ def build_cmd(target):
     exe = ".exe" if "windows" in target else ""
     for u in load_plan():
         for b in u["bins"]:
+            if b.get("only") and b["only"] not in target:
+                continue
             run("cargo", "build", "--release", *LOCKED, "--target", target, "-p", b["package"], "--bin", b["bin"],
                 capture=False)
             built = ROOT / "target" / target / "release" / f"{b['bin']}{exe}"
